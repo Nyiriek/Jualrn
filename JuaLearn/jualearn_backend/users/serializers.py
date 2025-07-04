@@ -18,7 +18,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'password', 'first_name', 'last_name', 'role']
-        # role is optional in the form, we’ll set it in the view
 
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -37,7 +36,7 @@ class AssignmentSerializer(serializers.ModelSerializer):
         model = Assignment
         fields = '__all__'
 
-# --- Add this custom JWT serializer for login ---
+# --- custom JWT serializer for login ---
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
@@ -50,7 +49,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         data = super().validate(attrs)
-        # Extra fields in login response (what your frontend expects)
+        # Extra fields in login response
         data['role'] = self.user.role
         data['firstName'] = self.user.first_name
         data['lastName'] = self.user.last_name

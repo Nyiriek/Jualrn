@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
 
-  // On mount, load from localStorage if present
+  // On mount, load from localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const storedAccess = localStorage.getItem("accessToken");
