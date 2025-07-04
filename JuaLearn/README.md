@@ -1,26 +1,18 @@
-Absolutely! Here’s a **complete, ready-to-submit README.md** for your JuaLearn project.
-You can copy this directly, and just replace placeholders with your actual repo link, Figma, and video links.
 
----
-
-````markdown
-# JuaLearn – Empowering Secondary Education in South Sudan
+## JuaLearn – Empowering Secondary Education in South Sudan
 
 JuaLearn is an AI-powered e-learning platform designed to provide high-quality educational resources for secondary school students and teachers in South Sudan. The platform offers curriculum-aligned courses, interactive lessons, assessments, and progress tracking, all through a modern, responsive web application.
 
----
 
 ## 🚀 Live Demo
 
 [**View Live App Here**](https://your-live-demo-link.com)
 
----
 
 ## 📂 Repository
 
 [**GitHub Repository**](https://github.com/Nyiriek/Jualrn.git)
 
----
 
 ## 🖥️ Features
 
