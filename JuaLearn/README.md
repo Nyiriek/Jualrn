@@ -4,9 +4,9 @@
 JuaLearn is an AI-powered e-learning platform designed to provide high-quality educational resources for secondary school students and teachers in South Sudan. The platform offers curriculum-aligned courses, interactive lessons, assessments, and progress tracking, all through a modern, responsive web application.
 
 
-## 🚀 Live Demo
+<!-- ## 🚀 Live Demo
 
-[**View Live App Here**](https://your-live-demo-link.com)
+[**View Live App Here**](https://your-live-demo-link.com) -->
 
 
 ## 📂 Repository
@@ -31,7 +31,12 @@ JuaLearn is an AI-powered e-learning platform designed to provide high-quality e
 ## 🎨 Design
 
 - **Figma Mockups**: [View on Figma](https://www.figma.com/design/k6Yv3nJTRARvB16VVmGkW2/JuaLearn?t=PWEJQoeGFeT8JZzf-1)
-- **Screenshots**:  
+
+- **UML Diagrams**:
+    ![Usecase diagram](../JuaLearn/src/assets/use-case.png)
+    ![ER Diadgram](../JuaLearn/src/assets/ERD.png)
+
+- **Interface Screenshots**:  
   ![Landing Page](./screenshots/landing.png)
   ![Student Dashboard](./screenshots/studentdashboard.png)
   ![Mobile View](./screenshots/mobilemode.png)
