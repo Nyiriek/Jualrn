@@ -32,8 +32,11 @@ JuaLearn is an AI-powered e-learning platform designed to provide high-quality e
 
 - **Figma Mockups**: [View on Figma](https://www.figma.com/design/k6Yv3nJTRARvB16VVmGkW2/JuaLearn?t=PWEJQoeGFeT8JZzf-1)
 
-- **UML Diagrams**:
+## UML Diagrams
+- **UseCase Diaagram**:
     ![Usecase diagram](../JuaLearn/src/assets/use-case.png)
+
+- **Entity Relational Diagram**:
     ![ER Diadgram](../JuaLearn/src/assets/ERD.png)
 
 - **Interface Screenshots**:  
@@ -41,9 +44,9 @@ JuaLearn is an AI-powered e-learning platform designed to provide high-quality e
   ![Student Dashboard](./screenshots/studentdashboard.png)
   ![Mobile View](./screenshots/mobilemode.png)
 
----
 
-## 🏗️ Tech Stack
+
+## Tech Stack
 
 - **Frontend**: React, TypeScript, MUI (Material-UI), CSS Modules
 - **Backend**: Django REST Framework, Python
@@ -52,7 +55,7 @@ JuaLearn is an AI-powered e-learning platform designed to provide high-quality e
 
 ---
 
-## 📦 Setup Instructions
+## Setup Instructions
 
 ### 1. Clone the Repo
 
@@ -93,7 +96,7 @@ DATABASE_URL=postgres://user:password@localhost:5432/jualearn
 
 ---
 
-## 🗂️ Project Structure
+## Project Structure
 
 ```
 jualearn/
@@ -115,7 +118,7 @@ jualearn/
 
 ---
 
-## 🧩 Sample Code
+## Sample Code
 
 ### Frontend: Responsive Navigation (React + CSS)
 
@@ -156,7 +159,7 @@ class AssignmentListView(generics.ListCreateAPIView):
 
 ---
 
-## 🗃️ Database Schema (Simplified)
+## Database Schema (Simplified)
 
 **User**
 
@@ -172,7 +175,7 @@ class AssignmentListView(generics.ListCreateAPIView):
 
 ---
 
-## 🚀 Deployment Plan
+## Deployment Plan
 
 * **Frontend:** Deployed on [Vercel](https://vercel.com/)
   `npm run build` → auto deploy from GitHub.
