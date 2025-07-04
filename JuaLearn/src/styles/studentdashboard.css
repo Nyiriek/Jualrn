@@ -1,0 +1,236 @@
+/* General container for dashboard */
+.container {
+  display: flex;
+  min-height: 100vh;
+  max-height: 150vh;
+  width: 100vw;
+  overflow-x: hidden;
+  background: none;
+  box-sizing: border-box;
+}
+
+/* Sidebar/nav */
+nav {
+  width: 240px;
+  background: #23395d;
+  color: #fff;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+nav ul li {
+  margin: 0;
+}
+nav .logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 0 20px 12px;
+  font-weight: bold;
+}
+.nav-item {
+  font-size: 1rem;
+}
+nav ul li a {
+  color: inherit;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  transition: background 0.2s;
+}
+nav ul li a:hover,
+nav ul li a.active {
+  background: #38598b;
+}
+.logout {
+  margin-top: 2rem;
+  color: #f45d48;
+}
+
+/* MAIN DASHBOARD CONTENT */
+.main {
+  flex: 1;
+  min-width: 0;
+  padding: 60px;
+  background: #fff;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* Top bar inside main */
+.main-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Skills/cards row */
+.main-skills {
+  display: flex;
+  gap: 1.5rem;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  flex: 1 1 220px;
+  min-width: 0;
+  text-align: center;
+  box-sizing: border-box;
+}
+.card i {
+  font-size: 2rem;
+  color: #23395d;
+  margin-bottom: 10px;
+}
+.card button {
+  background: #23395d;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  margin-top: 1rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* Enrolled courses section */
+.main-course {
+  margin-top: 2rem;
+}
+.course-box {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px rgba(30,55,90,0.05);
+  padding: 16px;
+  box-sizing: border-box;
+  overflow-x: auto;
+  width: 100%;
+}
+.course-box ul {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.course-box ul li {
+  padding: 6px 20px;
+  border-radius: 16px;
+  cursor: pointer;
+  background: #eee;
+  white-space: nowrap;
+}
+.course-box ul .active {
+  background: #23395d;
+  color: #fff;
+}
+
+/* Courses row: flex for desktop, column for mobile */
+.course {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.box {
+  flex: 1 1 220px;
+  min-width: 0;
+  background: #f3f6fb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  position: relative;
+  box-sizing: border-box;
+  transition: background 0.3s, color 0.3s;
+}
+.box i {
+  font-size: 2rem;
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  color: #8ca0be;
+}
+.box button {
+  background: #38598b;
+  color: #fff;
+  border: none;
+  padding: 0.4rem 1.2rem;
+  border-radius: 12px;
+  margin-top: 1rem;
+  cursor: pointer;
+}
+
+/* --- MOBILE RESPONSIVENESS --- */
+@media (max-width: 900px) {
+  .container {
+    flex-direction: column;
+    width: 100vw;
+    min-width: 0;
+    padding: 0 !important;
+  }
+  nav {
+    width: 100vw !important;
+    min-width: 0;
+    min-height: auto;
+    position: static !important;
+    border-radius: 0;
+  }
+  .main {
+    padding: 20px 4vw 20px 4vw;
+    min-width: 0;
+    width: 100vw;
+  }
+  .main-skills {
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1.2rem 0;
+  }
+  .main-top {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .course-box ul {
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .course {
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+    min-width: 0;
+  }
+  .card,
+  .box {
+    padding: 1rem;
+    min-width: 0;
+    width: 100%;
+    max-width: 100vw;
+    margin: 0;
+  }
+}
+
+/* Prevent horizontal scroll on anything, anywhere */
+html, body, #root {
+  width: 100vw;
+  min-width: 0;
+  overflow-x: hidden !important;
+  margin: 0;
+  padding: 0;
+}
+* {
+  box-sizing: border-box;
+}

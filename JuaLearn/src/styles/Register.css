@@ -1,0 +1,13 @@
+.register-form-root {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.register-form-paper {
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 400px;
+}

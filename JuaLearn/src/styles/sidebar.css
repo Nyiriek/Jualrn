@@ -1,0 +1,19 @@
+.sidebar-drawer {
+  width: 240px !important;
+  flex-shrink: 0;
+  background: #23395d !important;
+  color: #fff;
+  border: none;
+  box-shadow: 2px 0 8px rgba(35,57,93,0.03);
+  z-index: 2;
+}
+
+@media (max-width: 900px) {
+  .sidebar-drawer {
+    width: 60px !important;
+  }
+  .main {
+    margin-left: 60px;
+    padding: 16px;
+  }
+}

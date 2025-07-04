@@ -1,0 +1,209 @@
+/* Entire background */
+.landing-root {
+  background: #131d38;
+  min-height: 100vh;
+  color: #fff;
+  font-family: "Poppins", "Segoe UI", Arial, sans-serif;
+  width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Header */
+.landing-header {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2.5rem 2rem 1rem 2rem;
+  box-sizing: border-box;
+  gap: 2rem;
+}
+
+.landing-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.landing-logo img {
+  height: 38px;
+  width: 38px;
+  border-radius: 5px;
+  background: #fff;
+  object-fit: cover;
+}
+.logo-text {
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: #ffda66;
+  letter-spacing: 0.5px;
+}
+
+.landing-nav {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+.landing-nav a {
+  color: #fff;
+  font-weight: 500;
+  font-size: 1.02rem;
+  text-decoration: none;
+  padding: 6px 0;
+  position: relative;
+  transition: color 0.15s;
+}
+.landing-nav a:hover {
+  color: #ffda66;
+}
+
+/* Login Button */
+.login-btn {
+  background: #ffda66;
+  color: #131d38;
+  font-weight: 600;
+  padding: 8px 32px;
+  border: none;
+  border-radius: 7px;
+  font-size: 1.06rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.login-btn:hover {
+  background: #fff799;
+}
+
+/* ---- HERO SECTION ---- */
+.landing-hero {
+  max-width: 1240px;
+  margin: 2.2rem auto 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 3rem;
+  padding: 0 2rem;
+  flex-wrap: wrap;
+}
+
+/* Hero Text */
+.hero-text {
+  flex: 1 1 430px;
+  min-width: 240px;
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.hero-text h1 {
+  font-size: 2.3rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #fff;
+  margin-bottom: 0.7rem;
+  word-break: break-word;
+}
+.hero-text p {
+  font-size: 1.12rem;
+  font-weight: 400;
+  color: #f2f2f2;
+  margin-bottom: 0.5rem;
+}
+
+/* Hero Image */
+.hero-image {
+  flex: 1 1 320px;
+  display: flex;
+  justify-content: right;
+  align-items: center;
+  min-width: 160px;
+}
+.hero-image img {
+  width: 320px;
+  max-width: 95vw;
+  height: auto;
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 6px 32px 0 #21243b25;
+}
+
+/* ----------- Responsive Breakpoints ----------- */
+@media (max-width: 950px) {
+  .landing-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2rem;
+    padding: 0 5vw;
+  }
+  .hero-image {
+    justify-content: flex-start;
+    margin-top: 0;
+    width: 100%;
+  }
+  .hero-image img {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .landing-header, .landing-hero {
+    padding-left: 4vw;
+    padding-right: 4vw;
+  }
+  .landing-header {
+    gap: 0.6rem;
+  }
+  .landing-nav {
+    gap: 1.2rem;
+  }
+}
+
+@media (max-width: 550px) {
+  .landing-header {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 1.1rem 3vw 1rem 3vw;
+    gap: 0.8rem;
+  }
+  .landing-logo {
+    margin-bottom: 0.6rem;
+    justify-content: flex-start;
+  }
+  .landing-nav {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+  .login-btn {
+    align-self: flex-start;
+    margin-top: 0.5rem;
+    padding: 8px 15px;
+    font-size: 0.97rem;
+  }
+  .logo-text {
+    font-size: 1.05rem;
+  }
+}
+
+@media (max-width: 430px) {
+  .hero-text h1 {
+    font-size: 1.03rem;
+  }
+  .hero-text, .hero-image {
+    min-width: unset;
+    max-width: 100%;
+  }
+  .hero-image img {
+    width: 97vw;
+    min-width: 120px;
+    max-width: 230px;
+  }
+  .landing-header, .landing-hero {
+    padding: 0.4rem 2vw;
+  }
+}
