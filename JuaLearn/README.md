@@ -188,7 +188,7 @@ class AssignmentListView(generics.ListCreateAPIView):
 
 ## 🎥 Video Demo
 
-* [**Watch the 8-min demo here**](https://youtu.be/your-demo-link)
+* [**Watch the 7-min demo here**](https://www.youtube.com/watch?v=Xrc1xGmchn4)
 
   * Features: Landing, Login, Dashboard, Teacher/Student Views, Responsiveness, Theme Toggle
 
