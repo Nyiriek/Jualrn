@@ -18,17 +18,15 @@ JuaLearn is an AI-powered e-learning platform designed to provide high-quality e
 
 | Dashboard (Student) | Mobile View | Admin Dashboard | Error Handling |
 |---------------------|-------------|-----------------|---------------|
-| ![](testing-results/student_dashboard.png) | ![](testing-results/mobile_responsive.png) | ![](testing-results/admin_dashboard.png) | ![](testing-results/error_handling.png) |
+| ![](testing-results/studentdashboard.png) | ![](testing-results/mobile.png) | ![](testing-results/teacherdashboard.png) | ![](testing-results/studentdashboard-subjects.png) | ![](testing-results/progress.png) | ![](testing-results/Assignments.png) | ![]
+(testing-results/darkmode.png)
 
 ---
 
 ## Features
 
 - Responsive UI for desktop and mobile
-- Role-based dashboards (Student, Teacher, Admin)
-- Curriculum-aligned subject and course management
-- Assignment upload, tracking, and grading
-- Admin management of users and content
+- Role-based dashboards (Student, Teacher)
 - Authentication (JWT)
 - Dark/light theme toggle
 
@@ -55,14 +53,14 @@ JuaLearn is an AI-powered e-learning platform designed to provide high-quality e
 ### 1. Clone the repository
 
 ```bash
-git clone YOUR_REPO_LINK_HERE
-cd jualearn
+git clone https://github.com/Nyiriek/Jualrn.git
+cd Jualrn
 ````
 
 ### 2. Backend Setup
 
 ```bash
-cd backend
+cd jualearn_backend
 python -m venv venv
 source venv/bin/activate  # (or venv\Scripts\activate on Windows)
 pip install -r requirements.txt
@@ -81,7 +79,6 @@ python manage.py runserver
 ```bash
 cd ../frontend
 npm install
-cp .env.example .env  # Edit .env (API URL, etc.)
 npm run dev
 ```
 
@@ -108,7 +105,7 @@ npm run dev
 ## Analysis
 
 * **Objectives met:** Dashboard loads successfully for all roles; subject/assignment management works; authentication is secure.
-* **Limitations:** \[List any known bugs, missing features, or areas needing improvement]
+* **Limitations:** The AI assistant isn't fully functional yet since it requires curriculum aligned content for training.
 * **Responsiveness:** Fully functional on mobile and desktop (see screenshots).
 
 ---
@@ -117,39 +114,20 @@ npm run dev
 
 * Milestone 1 (UI & Navigation) enabled rapid onboarding for students and teachers.
 * Assignment and subject workflows empower remote learning and easy content updates.
-* Admin dashboard simplifies management of users and content.
+* Admin dashboard simplifies management of users and content (Not yet fully functional).
 
 ---
 
 ## Recommendations & Future Work
 
 * Integrate offline learning and SMS notifications.
+* Continue training the AI model on the curriculum content
 * Add support for more languages.
 * Further optimize for ultra-low bandwidth.
 * Build a mobile app (APK) for offline-first users.
 
 ---
 
-## License
-
-[MIT](LICENSE)
-
----
-
 ## Contact
 
-Questions? Suggestions? Contact us at [your.email@domain.com](mailto:your.email@domain.com)
-
----
-
-```
-
----
-
-**Tips for your submission:**
-- Paste screenshots into `/testing-results/` and update the README image links if needed.
-- Update the demo video and deployment links before submission.
-- List any improvements/limitations honestly—they appreciate self-awareness!
-
-If you want, I can provide **dummy Figma/design image links**, or expand on any section. Just ask!
-```
+Questions? Suggestions? Contact me at n.peat@alustudent.com(mailto:your.email@domain.com)
