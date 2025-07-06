@@ -68,7 +68,7 @@ cp .env.example .env  # Edit .env with your secrets
 
 # Migrate and seed database (optional)
 python manage.py migrate
-python manage.py createsuperuser  # For admin access
+python manage.py createsuperuser  
 
 # Run server
 python manage.py runserver
@@ -85,11 +85,11 @@ npm run dev
 ---
 
 ## UML Diagrams
-- **UseCase Diaagram**:
     ![Usecase diagram](images/use-case.png)
+- **UseCase Diaagram**:
 
-- **Entity Relational Diagram**:
     ![ER Diadgram](images/ERD.png)
+- **Entity Relational Diagram**:
 
 ## Database Schema
 * **User:** id, username, email, password, role, first\_name, last\_name, profile\_picture
@@ -134,4 +134,4 @@ npm run dev
 
 ## Contact
 
-Questions? Suggestions? Contact me at n.peat@alustudent.com(mailto:your.email@domain.com)
+Questions? Suggestions? Contact me at n.peat@alustudent.com
