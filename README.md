@@ -16,9 +16,9 @@ JuaLearn is an AI-powered e-learning platform designed to provide high-quality e
 
 > See the `/testing-results/` folder for full-size images and extra test cases.
 
-| Dashboard (Student) | Mobile View | Admin Dashboard | Error Handling |
-|---------------------|-------------|-----------------|---------------|
-| ![](testing-results/studentdashboard.png) | ![](testing-results/mobile.png) | ![](testing-results/admindashboard.png) | ![](testing-results/error.png) |
+| Dashboard (Student) | Mobile View |Dashboard (Teacher) |Darkmode
+|---------------------|-------------|--------------------|---------------|
+| ![](testing-results/studentdashboard.png) | ![](testing-results/mobile.png) | ![](testing-results/teacherdashboard.png) | ![](testing-results/darkmode.png) |
 
 
 ---
