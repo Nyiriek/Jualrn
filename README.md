@@ -85,11 +85,13 @@ npm run dev
 ---
 
 ## UML Diagrams
-  ![Use case diagram](images/use-case.png)
 - **UseCase Diagram**:
 
-  ![ER Diadgram](images/ERD.png)
+  ![Use case diagram](images/use-case.png)
+
 - **Entity Relational Diagram**:
+
+  ![ER Diadgram](images/ERD.png)
 
 ## Database Schema
 * **User:** id, username, email, password, role, first\_name, last\_name, profile\_picture
