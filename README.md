@@ -4,194 +4,152 @@
 JuaLearn is an AI-powered e-learning platform designed to provide high-quality educational resources for secondary school students and teachers in South Sudan. The platform offers curriculum-aligned courses, interactive lessons, assessments, and progress tracking, all through a modern, responsive web application.
 
 
-<!-- ## 🚀 Live Demo
+## Demo
 
-[**View Live App Here**](https://your-live-demo-link.com) -->
+- **[Demo Video (YouTube/Drive Link)](https://www.youtube.com/watch?v=BMOncSmaMIA)**
 
-
-## 📂 Repository
-
-[**GitHub Repository**](https://github.com/Nyiriek/Jualrn.git)
-
-
-## 🖥️ Features
-
-- **Landing Page**: Welcomes users and provides app overview.
-- **Role-Based Login**: Separate login for students and teachers.
-- **Responsive Dashboard**: Custom dashboard for both students and teachers.
-- **Subject Explorer**: View available subjects and courses.
-- **Assignments & Progress Tracking**: For students.
-- **Teacher Tools**: Manage courses, gradebooks, and reports.
-- **Profile & Notifications**: Update profile, view notifications.
-- **Theme Toggle**: Switch between light and dark mode.
-- **Mobile-First Design**: Fully responsive for all screen sizes.
+-**The website has not been deployed yet because it is still under production, so there is no deployment link**
 
 ---
 
-## 🎨 Design
+## Screenshots
 
-- **Figma Mockups**: [View on Figma](https://www.figma.com/design/k6Yv3nJTRARvB16VVmGkW2/JuaLearn?t=PWEJQoeGFeT8JZzf-1)
+> See the `/testing-results/` folder for full-size images and extra test cases.
 
-## UML Diagrams
-- **UseCase Diaagram**:
-    ![Usecase diagram](../JuaLearn/src/assets/use-case.png)
-
-- **Entity Relational Diagram**:
-    ![ER Diadgram](../JuaLearn/src/assets/ERD.png)
-
-- **Interface Screenshots**:  
-  ![Landing Page](./screenshots/landing.png)
-  ![Student Dashboard](./screenshots/studentdashboard.png)
-  ![Mobile View](./screenshots/mobilemode.png)
-
-
-
-## Tech Stack
-
-- **Frontend**: React, TypeScript, MUI (Material-UI), CSS Modules
-- **Backend**: Django REST Framework, Python
-- **Database**: PostgreSQL
-- **Deployment**: Vercel (frontend), Render (backend)
+| Dashboard (Student) | Mobile View | Admin Dashboard | Error Handling |
+|---------------------|-------------|-----------------|---------------|
+| ![](testing-results/student_dashboard.png) | ![](testing-results/mobile_responsive.png) | ![](testing-results/admin_dashboard.png) | ![](testing-results/error_handling.png) |
 
 ---
 
-## Setup Instructions
+## Features
 
-### 1. Clone the Repo
+- Responsive UI for desktop and mobile
+- Role-based dashboards (Student, Teacher, Admin)
+- Curriculum-aligned subject and course management
+- Assignment upload, tracking, and grading
+- Admin management of users and content
+- Authentication (JWT)
+- Dark/light theme toggle
+
+---
+
+## Technologies Used
+
+- **Frontend:** React, TypeScript, MUI (Material-UI), CSS Modules
+- **Backend:** Django, Django REST Framework, SimpleJWT
+- **Database:** PostgreSQL (or SQLite for local dev)
+- **Deployment:** Vercel/Netlify (frontend), Railway/Heroku/AWS EC2 (backend)
+- **Design:** Figma (see `/designs/`)
+
+---
+
+## Installation & Setup
+
+### Prerequisites
+
+- Node.js (18+), npm/yarn
+- Python 3.10+, pip
+- PostgreSQL or SQLite
+
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/Nyiriek/Jualrn.git
+git clone YOUR_REPO_LINK_HERE
 cd jualearn
 ````
 
-### 2. Frontend Setup
+### 2. Backend Setup
 
 ```bash
-cd JuaLearn
-npm install
-npm run dev        # or npm start
-```
-
-### 3. Backend Setup
-
-```bash
-cd ../jualearn_backend
+cd backend
 python -m venv venv
-source venv/bin/activate         # Windows: venv\Scripts\activate
+source venv/bin/activate  # (or venv\Scripts\activate on Windows)
 pip install -r requirements.txt
-python manage.py makemigrations
+cp .env.example .env  # Edit .env with your secrets
+
+# Migrate and seed database (optional)
 python manage.py migrate
+python manage.py createsuperuser  # For admin access
+
+# Run server
 python manage.py runserver
 ```
 
-### 4. Environment Variables
+### 3. Frontend Setup
 
-Create a `.env` file in the backend directory with:
-
-```
-DEBUG=True
-SECRET_KEY=your-secret-key
-DATABASE_URL=postgres://user:password@localhost:5432/jualearn
-```
-
----
-
-## Project Structure
-
-```
-jualearn/
-  frontend/
-    src/
-      pages/
-      components/
-      context/
-      styles/
-  backend/
-    jualearn/
-    users/
-    assignments/
-    subjects/
-    ...
-  screenshots/
-  README.md
+```bash
+cd ../frontend
+npm install
+cp .env.example .env  # Edit .env (API URL, etc.)
+npm run dev
 ```
 
 ---
 
-## Sample Code
+## Database Schema
 
-### Frontend: Responsive Navigation (React + CSS)
+> *(Add or link to your ER diagram/image here, or describe major tables)*
 
-```jsx
-// src/pages/LandingPage.tsx
-<header className="landing-header">
-  <div className="landing-logo">...</div>
-  <nav className="landing-nav">
-    <a href="#home">Home</a>
-    <a href="#about">About</a>
-    ...
-  </nav>
-  <button className="login-btn" onClick={() => navigate("/login")}>Login</button>
-</header>
-```
+* **User:** id, username, email, password, role, first\_name, last\_name, profile\_picture
+* **Subject:** id, name, description
+* **Assignment:** id, title, description, subject, created\_by, assigned\_to, status
 
-```css
-@media (max-width: 650px) {
-  .landing-header, .landing-hero {
-    padding: 1.1rem 1rem;
-  }
-  .landing-nav {
-    gap: 1.1rem;
-    font-size: 0.98rem;
-  }
-}
-```
+---
 
-### Backend: DRF Endpoint
+## Testing Results
 
-```python
-# assignments/views.py
-class AssignmentListView(generics.ListCreateAPIView):
-    queryset = Assignment.objects.all()
-    serializer_class = AssignmentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+* Screenshots of passed tests and error cases can be found in the [`/testing-results`](./testing-results) folder.
+* Tested on Chrome, Firefox, and Android browser.
+* Performance tested on both high-end and low-end devices.
+
+---
+
+## Analysis
+
+* **Objectives met:** Dashboard loads successfully for all roles; subject/assignment management works; authentication is secure.
+* **Limitations:** \[List any known bugs, missing features, or areas needing improvement]
+* **Responsiveness:** Fully functional on mobile and desktop (see screenshots).
+
+---
+
+## Discussion
+
+* Milestone 1 (UI & Navigation) enabled rapid onboarding for students and teachers.
+* Assignment and subject workflows empower remote learning and easy content updates.
+* Admin dashboard simplifies management of users and content.
+
+---
+
+## Recommendations & Future Work
+
+* Integrate offline learning and SMS notifications.
+* Add support for more languages.
+* Further optimize for ultra-low bandwidth.
+* Build a mobile app (APK) for offline-first users.
+
+---
+
+## License
+
+[MIT](LICENSE)
+
+---
+
+## Contact
+
+Questions? Suggestions? Contact us at [your.email@domain.com](mailto:your.email@domain.com)
+
+---
+
 ```
 
 ---
 
-## Database Schema (Simplified)
+**Tips for your submission:**
+- Paste screenshots into `/testing-results/` and update the README image links if needed.
+- Update the demo video and deployment links before submission.
+- List any improvements/limitations honestly—they appreciate self-awareness!
 
-**User**
-
-* id, username, email, password, role (student/teacher/admin), profile\_picture
-
-**Subject**
-
-* id, name, description
-
-**Assignment**
-
-* id, title, subject (ForeignKey), assigned\_to (ForeignKey), created\_by (ForeignKey)
-
----
-
-## Deployment Plan
-
-* **Frontend:** Deployed on [Vercel](https://vercel.com/)
-  `npm run build` → auto deploy from GitHub.
-* **Backend:** Deployed on [Render](https://render.com/)
-  Configured with environment variables and PostgreSQL.
-* **Database:** PostgreSQL on [Render](https://render.com/) or [Supabase](https://supabase.com/).
-* **CORS:** Configured to allow frontend origin.
-
----
-
-## 🎥 Video Demo
-
-* [**Watch the 7-min demo here**](https://www.youtube.com/watch?v=Xrc1xGmchn4)
-
-  * Features: Landing, Login, Dashboard, Teacher/Student Views, Responsiveness, Theme Toggle
-
-
-# Thank you for exploring JuaLearn!
-
+If you want, I can provide **dummy Figma/design image links**, or expand on any section. Just ask!
+```

@@ -29,7 +29,6 @@ class AssignmentViewSet(viewsets.ModelViewSet):
         return Assignment.objects.none()
 
     def perform_create(self, serializer):
-        # Only teachers can create assignments for now, but could allow admin too if needed
         if self.request.user.role == 'teacher':
             serializer.save(created_by=self.request.user)
         elif self.request.user.role == 'admin':
@@ -53,7 +52,6 @@ class SubjectViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if hasattr(user, 'role'):
             if user.role == 'teacher':
-                # Teachers see subjects they are associated with (created assignments for)
                 return Subject.objects.filter(assignment__created_by=user).distinct()
             elif user.role == 'admin':
                 return Subject.objects.all()
@@ -62,19 +60,16 @@ class SubjectViewSet(viewsets.ModelViewSet):
         return Subject.objects.none()
 
     def perform_create(self, serializer):
-        # Teachers and admins can create subjects
         if self.request.user.role in ['teacher', 'admin']:
             serializer.save()
         else:
             raise permissions.PermissionDenied("Not authorized.")
 
     def perform_destroy(self, instance):
-        # Only allow delete by creator (teacher) or admin
         user = self.request.user
         if user.role == 'admin':
             instance.delete()
         elif user.role == 'teacher':
-            # Check if teacher created at least one assignment in this subject
             if Assignment.objects.filter(subject=instance, created_by=user).exists():
                 instance.delete()
             else:
@@ -104,14 +99,13 @@ class RegisterTeacherView(generics.CreateAPIView):
         serializer.save(role='teacher')
 
 # --------- USER MANAGEMENT ---------
-class UserViewSet(viewsets.ModelViewSet):  # <-- was ReadOnlyModelViewSet; use ModelViewSet for admin control
+class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
             return [IsAuthenticated()]
-        # Only admins can add or delete users
         return [IsAdminUser()]
 
 # --------- PROFILE ---------
@@ -147,3 +141,29 @@ class SearchView(APIView):
             for a in assignments
         ])
         return Response({"results": data})
+
+# ---------- ADMIN LOGIN ENDPOINT ----------
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework import status
+
+class AdminLoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        user = authenticate(username=username, password=password)
+        if user is not None and (getattr(user, "role", None) == "admin" or user.is_staff or user.is_superuser):
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                "username": user.username,
+                "email": user.email,
+                "role": "admin",
+                "firstName": user.first_name,
+                "lastName": user.last_name,
+                "access": str(refresh.access_token),
+                "refresh": str(refresh)
+            })
+        return Response({"detail": "Invalid credentials or not an admin."}, status=status.HTTP_401_UNAUTHORIZED)

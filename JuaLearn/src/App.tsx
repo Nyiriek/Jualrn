@@ -9,6 +9,7 @@ import StudentRegister from './pages/StudentRegister';
 import TeacherRegister from './pages/TeacherRegister';
 import SubjectContent from './pages/SubjectContent';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminLogin from './pages/AdminLogin';  // <-- Added
 import { useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoutes';
 
@@ -45,9 +46,16 @@ const App = () => {
         <Route path="/register/student" element={<StudentRegister />} />
         <Route path="/register/teacher" element={<TeacherRegister />} />
         <Route path="/student/subject/:id" element={<SubjectContent />} />
+
+        {/* Admin login and dashboard */}
+        <Route path="/admin-login" element={<AdminLogin />} />
         <Route
           path="/admin"
-          element={user?.role === "admin" ? <AdminDashboard /> : <Navigate to="/login" />}
+          element={
+            user?.role === "admin"
+              ? <AdminDashboard />
+              : <Navigate to="/admin-login" replace />
+          }
         />
 
         {/* STUDENT NESTED DASHBOARD */}

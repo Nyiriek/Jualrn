@@ -31,19 +31,9 @@ const AdminLogin: React.FC = () => {
       const data = await response.json();
       if (response.ok && data.access) {
         // Store tokens and user info
+        localStorage.setItem("user", JSON.stringify(data));
         localStorage.setItem("accessToken", data.access);
         localStorage.setItem("refreshToken", data.refresh);
-
-        // Optional: store user info (if provided by backend)
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            username,
-            role: data.role || "admin",
-            firstName: data.firstName || "",
-            lastName: data.lastName || "",
-          })
-        );
 
         // Redirect to admin dashboard
         navigate("/admin");
