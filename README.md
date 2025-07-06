@@ -38,7 +38,7 @@ JuaLearn is an AI-powered e-learning platform designed to provide high-quality e
 - **Backend:** Django, Django REST Framework, SimpleJWT
 - **Database:** PostgreSQL (or SQLite for local dev)
 - **Deployment:** Vercel/Netlify (frontend), Railway/Heroku/AWS EC2 (backend)
-- **Design:** Figma (see `/designs/`)
+- **Design:** Figma (see (https://www.figma.com/design/k6Yv3nJTRARvB16VVmGkW2/JuaLearn?t=PWEJQoeGFeT8JZzf-1))
 
 ---
 
