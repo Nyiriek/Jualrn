@@ -18,8 +18,8 @@ JuaLearn is an AI-powered e-learning platform designed to provide high-quality e
 
 | Dashboard (Student) | Mobile View | Admin Dashboard | Error Handling |
 |---------------------|-------------|-----------------|---------------|
-| ![](testing-results/studentdashboard.png) | ![](testing-results/mobile.png) | ![](testing-results/teacherdashboard.png) | ![](testing-results/studentdashboard-subjects.png) | ![](testing-results/progress.png) | ![](testing-results/Assignments.png) | ![]
-(testing-results/darkmode.png)
+| ![](testing-results/studentdashboard.png) | ![](testing-results/mobile.png) | ![](testing-results/admindashboard.png) | ![](testing-results/error.png) |
+
 
 ---
 
@@ -84,10 +84,14 @@ npm run dev
 
 ---
 
+## UML Diagrams
+- **UseCase Diaagram**:
+    ![Usecase diagram](../JuaLearn/src/assets/use-case.png)
+
+- **Entity Relational Diagram**:
+    ![ER Diadgram](../JuaLearn/src/assets/ERD.png)
+
 ## Database Schema
-
-> *(Add or link to your ER diagram/image here, or describe major tables)*
-
 * **User:** id, username, email, password, role, first\_name, last\_name, profile\_picture
 * **Subject:** id, name, description
 * **Assignment:** id, title, description, subject, created\_by, assigned\_to, status
