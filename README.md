@@ -77,7 +77,7 @@ python manage.py runserver
 ### 3. Frontend Setup
 
 ```bash
-cd ../frontend
+cd ./Jualearn
 npm install
 npm run dev
 ```
