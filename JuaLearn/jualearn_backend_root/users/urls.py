@@ -11,7 +11,7 @@ from .views import (
 )
 
 router = DefaultRouter()
-router.register(r'assignments', AssignmentViewSet)
+router.register(r'assignments', AssignmentViewSet, basename='assignments')
 router.register(r'subjects', SubjectViewSet)
 router.register(r'users', UserViewSet)
 router.register(r'quizzes', QuizViewSet, basename='quiz')

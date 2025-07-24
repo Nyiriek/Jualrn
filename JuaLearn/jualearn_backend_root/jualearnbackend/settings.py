@@ -42,6 +42,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = 'jualearnbackend.urls'
@@ -69,7 +70,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'jualearn_db',
         'USER': 'jualearn_user',
-        'PASSWORD': 'your_password',
+        'PASSWORD': 'jualearn',
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -99,7 +100,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -135,7 +137,7 @@ REST_FRAMEWORK = {
     ],
 }
 
-# Djoser settings (optional: customize as needed)
+# Djoser settings
 DJOSER = {
     'USER_CREATE_PASSWORD_RETYPE': True,
     'SERIALIZERS': {},
@@ -144,4 +146,3 @@ DJOSER = {
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 CONTENT_FOLDER = os.path.join(BASE_DIR, './content')
-

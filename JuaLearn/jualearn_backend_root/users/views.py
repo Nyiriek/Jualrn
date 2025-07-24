@@ -70,6 +70,7 @@ class AssignmentViewSet(viewsets.ModelViewSet):
         subject = validated_data['subject']
         due_date = validated_data['due_date']
 
+        # Create base assignment
         base_assignment = Assignment.objects.create(
             title=title,
             subject=subject,
@@ -77,10 +78,10 @@ class AssignmentViewSet(viewsets.ModelViewSet):
             created_by=self.request.user,
             assigned_to=None,
             grade=None,
-            published=False  # default unpublished
+            published=False
         )
 
-        # Bulk create one assignment per enrolled student
+        # Bulk create for enrolled students
         enrolled_students = Enrollment.objects.filter(subject=subject).values_list('student', flat=True)
         assignments = [
             Assignment(
@@ -94,6 +95,9 @@ class AssignmentViewSet(viewsets.ModelViewSet):
             ) for student_id in enrolled_students
         ]
         Assignment.objects.bulk_create(assignments)
+
+        # Inject base_assignment into serializer._instance
+        serializer.instance = base_assignment
 
         # Notifications are sent only when published, not on create
 
