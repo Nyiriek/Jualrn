@@ -7,7 +7,7 @@ const ProtectedRoute = ({
   allowed,
 }: {
   children: ReactNode;
-  allowed: "student" | "teacher";
+  allowed: "student" | "teacher" | "admin";
 }) => {
   const { user } = useAuth();
   return user?.role === allowed ? <>{children}</> : <Navigate to="/login" replace />;

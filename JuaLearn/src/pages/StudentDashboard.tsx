@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import SubjectCard from '../components/SubjectCard';
 import AssignmentList from '../components/AssignmentList';
@@ -7,16 +8,57 @@ import ChatbotEmbed from '../components/ChatBotEmbed';
 import { useAuth } from '../context/AuthContext';
 import { useThemeMode } from '../context/ThemeContext';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import axios from '../api/axios';
+
+type Subject = {
+  id: number;
+  name: string;
+  description?: string;
+  image?: string;
+};
+
+type Enrollment = {
+  id: number;
+  subject: Subject | null;
+  enrolled_at: string;
+};
 
 const StudentDashboard: React.FC = () => {
   const { user } = useAuth();
   const { mode } = useThemeMode();
-  const isMobile = useMediaQuery('(max-width:700px)');
+  const navigate = useNavigate();
 
-  // Responsive flex direction and gaps
-  const courseListStyle: React.CSSProperties = isMobile
+  // Responsive breakpoints
+  const isSmartphone = useMediaQuery('(max-width:640px)');
+  const isTablet = useMediaQuery('(max-width:768px)');
+  const isDesktop = useMediaQuery('(max-width:1200px)');
+  const isLargeDesktop = useMediaQuery('(max-width:1400px)');
+
+  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+  const [loadingEnrollments, setLoadingEnrollments] = useState(true);
+  const [errorEnrollments, setErrorEnrollments] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchEnrollments = async () => {
+      setLoadingEnrollments(true);
+      try {
+        const res = await axios.get('/student/enrollments/');
+        setEnrollments(res.data);
+        setErrorEnrollments(null);
+      } catch (err) {
+        setErrorEnrollments('Failed to load enrolled courses.');
+      } finally {
+        setLoadingEnrollments(false);
+      }
+    };
+
+    fetchEnrollments();
+  }, []);
+
+  // Flexbox style for enrolled courses container
+  const courseListStyle: React.CSSProperties = (isSmartphone || isTablet)
     ? { display: "flex", flexDirection: "column", gap: "1rem", marginTop: "1rem" }
-    : { display: "flex", gap: "1.5rem", marginTop: "1.5rem" };
+    : { display: "flex", gap: "1.5rem", marginTop: "1.5rem", flexWrap: "wrap" };
 
   const courseBoxStyle: React.CSSProperties = {
     background: mode === "dark" ? "#2e313a" : "#f3f6fb",
@@ -25,9 +67,10 @@ const StudentDashboard: React.FC = () => {
       ? "0 0 18px #3895ff55"
       : "0 2px 8px rgba(0,0,0,0.06)",
     borderRadius: "8px",
-    padding: isMobile ? "1rem" : "1.5rem",
-    flex: 1,
-    margin: isMobile ? "0" : "0 0.75rem",
+    padding: (isSmartphone || isTablet) ? "1rem" : "1.5rem",
+    flex: isSmartphone || isTablet ? "none" : 1,
+    width: isSmartphone ? "100%" : isTablet ? "48%" : "auto",
+    margin: isSmartphone || isTablet ? "0 0 1rem 0" : "0 0.75rem",
     textAlign: "center" as const,
     minWidth: 0,
     transition: "background 0.3s, color 0.3s",
@@ -39,83 +82,64 @@ const StudentDashboard: React.FC = () => {
     boxShadow: mode === "dark"
       ? "0 2px 14px 0 #132c4f44"
       : "0 1px 6px rgba(30,55,90,0.05)",
-    padding: isMobile ? 10 : 16,
+    padding: (isSmartphone || isTablet) ? 10 : 16,
     transition: "background 0.3s"
   };
 
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-container" style={{ padding: isSmartphone ? '0.5rem' : '1rem 2rem' }}>
       <Header title={`Welcome, ${user?.firstName || "Student"}`} />
-      <section style={{ marginBottom: isMobile ? "1rem" : "2rem" }}>
+      
+      <section style={{ marginBottom: isSmartphone ? "1rem" : "2rem" }}>
         <SubjectCard />
       </section>
+
       <section>
         <h2>Enrolled Courses</h2>
         <div style={enrolledCoursesContainerStyle}>
-          <ul style={{
-            display: "flex",
-            flexDirection: isMobile ? "column" : "row",
-            listStyle: "none",
-            padding: 0,
-            margin: 0,
-            color: mode === "dark" ? "#fff" : "#38598b"
-          }}>
-            <li style={{ marginRight: isMobile ? 0 : 16, marginBottom: isMobile ? 6 : 0, fontWeight: 600 }}>In progress</li>
-            <li style={{ marginRight: isMobile ? 0 : 16, marginBottom: isMobile ? 6 : 0 }}>Explore</li>
-            <li>Finished</li>
-          </ul>
-          <div style={courseListStyle}>
-            <div style={courseBoxStyle}>
-              <h3>Mathematics</h3>
-              <p>80% - progress</p>
-              <button style={{
-                background: mode === "dark" ? "#3895ff" : "#38598b",
-                color: "#fff",
-                border: "none",
-                padding: "0.4rem 1.2rem",
-                borderRadius: "12px",
-                marginTop: "1rem",
-                cursor: "pointer",
-                transition: "background 0.3s"
-              }}>Continue</button>
+          {loadingEnrollments ? (
+            <p>Loading courses...</p>
+          ) : errorEnrollments ? (
+            <p style={{ color: "red" }}>{errorEnrollments}</p>
+          ) : enrollments.length === 0 ? (
+            <p>You have not enrolled in any courses yet.</p>
+          ) : (
+            <div style={courseListStyle}>
+              {enrollments.map(({ id, subject }) => (
+                <div key={id} style={courseBoxStyle}>
+                  <h3>{subject?.name ?? "Unnamed Subject"}</h3>
+                  <button
+                    style={{
+                      background: mode === "dark" ? "#3895ff" : "#38598b",
+                      color: "#fff",
+                      border: "none",
+                      padding: "0.4rem 1.2rem",
+                      borderRadius: "12px",
+                      marginTop: "1rem",
+                      cursor: "pointer",
+                      transition: "background 0.3s",
+                      width: "100%",
+                      maxWidth: 180,
+                    }}
+                    onClick={() => subject?.id && navigate(`/student/subject/${subject.id}`)}
+                  >
+                    Continue
+                  </button>
+                </div>
+              ))}
             </div>
-            <div style={courseBoxStyle}>
-              <h3>Economics</h3>
-              <p>50% - progress</p>
-              <button style={{
-                background: mode === "dark" ? "#3895ff" : "#38598b",
-                color: "#fff",
-                border: "none",
-                padding: "0.4rem 1.2rem",
-                borderRadius: "12px",
-                marginTop: "1rem",
-                cursor: "pointer",
-                transition: "background 0.3s"
-              }}>Continue</button>
-            </div>
-            <div style={courseBoxStyle}>
-              <h3>Citizenship</h3>
-              <p>30% - progress</p>
-              <button style={{
-                background: mode === "dark" ? "#3895ff" : "#38598b",
-                color: "#fff",
-                border: "none",
-                padding: "0.4rem 1.2rem",
-                borderRadius: "12px",
-                marginTop: "1rem",
-                cursor: "pointer",
-                transition: "background 0.3s"
-              }}>Continue</button>
-            </div>
-          </div>
+          )}
         </div>
       </section>
-      <section style={{ marginTop: isMobile ? "1.2rem" : "2.5rem" }}>
+
+      <section style={{ marginTop: isSmartphone ? "1.2rem" : "2.5rem" }}>
         <h2>Progress Tracker</h2>
         <PerformanceChart />
-        <h2 style={{ marginTop: isMobile ? "1rem" : "2rem" }}>Assignments</h2>
+        
+        <h2 style={{ marginTop: isSmartphone ? "1rem" : "2rem" }}>Assignments</h2>
         <AssignmentList />
       </section>
+
       <ChatbotEmbed />
     </div>
   );

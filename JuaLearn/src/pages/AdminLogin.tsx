@@ -6,9 +6,11 @@ import {
   TextField,
   Button,
   Alert,
-  CircularProgress
+  CircularProgress,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import api from "../api/axios";
 
 const AdminLogin: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -17,31 +19,43 @@ const AdminLogin: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  const { login } = useAuth();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
 
     try {
-      const response = await fetch("/api/auth/admin-login/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password })
+      const response = await api.post("/auth/admin-login/", {
+        username,
+        password,
       });
-      const data = await response.json();
-      if (response.ok && data.access) {
-        // Store tokens and user info
-        localStorage.setItem("user", JSON.stringify(data));
-        localStorage.setItem("accessToken", data.access);
-        localStorage.setItem("refreshToken", data.refresh);
 
-        // Redirect to admin dashboard
+      const data = response.data;
+
+      if (data.access) {
+        login({
+          id: data.id,
+          username: data.username,
+          email: data.email,
+          role: data.role,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          access: data.access,
+          refresh: data.refresh,
+        });
+
         navigate("/admin");
       } else {
         setError(data.detail || "Login failed. Please check your credentials.");
       }
-    } catch (err) {
-      setError("Network error. Please try again.");
+    } catch (err: any) {
+      if (err.response?.data?.detail) {
+        setError(err.response.data.detail);
+      } else {
+        setError("Network error. Please try again.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -66,7 +80,7 @@ const AdminLogin: React.FC = () => {
             variant="outlined"
             margin="normal"
             value={username}
-            onChange={e => setUsername(e.target.value)}
+            onChange={(e) => setUsername(e.target.value)}
             autoComplete="username"
             required
           />
@@ -77,7 +91,7 @@ const AdminLogin: React.FC = () => {
             margin="normal"
             type="password"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
             required
           />

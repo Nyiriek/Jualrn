@@ -5,17 +5,48 @@ import '../styles/Register.css';
 
 const TeacherRegister = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    institution: '',
+    yearsOfExperience: '',
+    phoneNumber: '',
+    password: '',
+    confirmPassword: '',
+  });
   const [error, setError] = useState('');
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const validate = () => {
+    if (!form.name.trim()) return 'Full name is required.';
+    if (!form.email.trim()) return 'Email is required.';
+    if (!form.institution.trim()) return 'Institution is required.';
+    if (!form.yearsOfExperience.trim()) return 'Years of experience is required.';
+    if (isNaN(Number(form.yearsOfExperience)) || Number(form.yearsOfExperience) < 0) {
+      return 'Years of experience must be a positive number.';
+    }
+    if (!form.phoneNumber.trim()) return 'Phone number is required.';
+    if (!form.password) return 'Password is required.';
+    if (form.password !== form.confirmPassword) return 'Passwords do not match.';
+    return null;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Split full name
-    const [first_name, ...rest] = name.trim().split(' ');
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    // Split full name into first and last name
+    const [first_name, ...rest] = form.name.trim().split(' ');
     const last_name = rest.join(' ');
 
     try {
@@ -23,23 +54,27 @@ const TeacherRegister = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          username: email, // You can use email as username
-          email,
-          password,
+          username: form.email,
+          email: form.email,
           first_name,
           last_name,
-          role: "teacher",
+          institution: form.institution,
+          years_of_experience: Number(form.yearsOfExperience),
+          phone_number: form.phoneNumber,
+          password: form.password,
+          password2: form.confirmPassword,
+          role: 'teacher',
         }),
       });
 
       if (!response.ok) {
         const err = await response.json();
-        setError(err?.detail || "Registration failed. Please try again.");
+        setError(err?.detail || 'Registration failed. Please try again.');
         return;
       }
 
       navigate('/login/teacher');
-    } catch (err) {
+    } catch {
       setError('Registration failed. Please try again.');
     }
   };
@@ -56,18 +91,52 @@ const TeacherRegister = () => {
             variant="outlined"
             fullWidth
             margin="normal"
+            name="name"
             required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={form.name}
+            onChange={handleChange}
           />
           <TextField
             label="Email or Username"
             variant="outlined"
             fullWidth
             margin="normal"
+            name="email"
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={form.email}
+            onChange={handleChange}
+          />
+          <TextField
+            label="Institution"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            name="institution"
+            required
+            value={form.institution}
+            onChange={handleChange}
+          />
+          <TextField
+            label="Years of Experience"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            name="yearsOfExperience"
+            required
+            type="number"
+            inputProps={{ min: 0 }}
+            value={form.yearsOfExperience}
+            onChange={handleChange}
+          />
+          <TextField
+            label="Phone Number"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            name="phoneNumber"
+            required
+            value={form.phoneNumber}
+            onChange={handleChange}
           />
           <TextField
             label="Password"
@@ -75,9 +144,21 @@ const TeacherRegister = () => {
             type="password"
             fullWidth
             margin="normal"
+            name="password"
             required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={form.password}
+            onChange={handleChange}
+          />
+          <TextField
+            label="Confirm Password"
+            variant="outlined"
+            type="password"
+            fullWidth
+            margin="normal"
+            name="confirmPassword"
+            required
+            value={form.confirmPassword}
+            onChange={handleChange}
           />
           {error && (
             <Typography color="error" variant="body2" sx={{ mt: 1 }}>

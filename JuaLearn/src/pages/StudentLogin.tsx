@@ -1,4 +1,3 @@
-// src/pages/StudentLogin.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -17,12 +16,24 @@ const StudentLogin = () => {
     e.preventDefault();
     setError('');
     try {
-      const res = await api.post('auth/login/', {
+      const res = await api.post('token/', {
         username: email,
         password,
       });
-      // This expects the backend to return: { access, refresh, role, ... }
-      login(res.data); // Store user+token in context/localStorage
+
+      // Pass entire user info + tokens object to login
+      login({
+        id: res.data.id,
+        username: res.data.username,
+        email: res.data.email,
+        role: res.data.role,
+        firstName: res.data.firstName,
+        lastName: res.data.lastName,
+        profilePicture: res.data.profilePicture,
+        access: res.data.access,
+        refresh: res.data.refresh,
+      });
+
       navigate('/student');
     } catch (err: any) {
       setError('Login failed. Please check your email and password.');

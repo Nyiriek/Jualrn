@@ -1,80 +1,82 @@
+# JuaLearn – Empowering Secondary Education in South Sudan
 
-## JuaLearn – Empowering Secondary Education in South Sudan
+JuaLearn is an AI-powered e-learning platform designed to provide high-quality educational resources tailored for secondary school students and teachers in South Sudan. The platform offers curriculum-aligned courses, interactive lessons, quizzes, assessments, and progress tracking — all delivered through a modern, responsive web application.
 
-JuaLearn is an AI-powered e-learning platform designed to provide high-quality educational resources for secondary school students and teachers in South Sudan. The platform offers curriculum-aligned courses, interactive lessons, assessments, and progress tracking, all through a modern, responsive web application.
-
+---
 
 ## Demo
 
-- **[Demo Video (YouTube/Drive Link)](https://www.youtube.com/watch?v=BMOncSmaMIA)**
-
--**The website has not been deployed yet because it is still under production, so there is no deployment link**
+* **[Demo Video (YouTube/Drive Link)](https://www.youtube.com/watch?v=BMOncSmaMIA)**
+* *Note:* The website is currently under active development and not yet deployed to a public URL.
 
 ---
 
 ## Screenshots
 
-> See the `/testing-results/` folder for full-size images and extra test cases.
+> Full-size images and additional test cases are available in the `/testing-results/` folder.
 
-| Dashboard (Student) | Mobile View |Dashboard (Teacher) |Darkmode
-|---------------------|-------------|--------------------|---------------|
+| Dashboard (Student)                       | Mobile View                     | Dashboard (Teacher)                       | Dark Mode                         |
+| ----------------------------------------- | ------------------------------- | ----------------------------------------- | --------------------------------- |
 | ![](testing-results/studentdashboard.png) | ![](testing-results/mobile.png) | ![](testing-results/teacherdashboard.png) | ![](testing-results/darkmode.png) |
-
 
 ---
 
 ## Features
 
-- Responsive UI for desktop and mobile
-- Role-based dashboards (Student, Teacher)
-- Authentication (JWT)
-- Dark/light theme toggle
+* Responsive user interface for desktop and mobile devices
+* Role-based dashboards (Student, Teacher, Admin)
+* Secure authentication using JWT tokens
+* Dark/light mode toggle for user preference
+* AI assistant integration (in progress)
+* Subject enrollment and management
+* Interactive quizzes with real-time grading and feedback
+* Assignment creation, submission, and grading workflows
+* Notification system for important updates and reminders
 
----
 
-## Technologies Used
 
-- **Frontend:** React, TypeScript, MUI (Material-UI), CSS Modules
-- **Backend:** Django, Django REST Framework, SimpleJWT
-- **Database:** PostgreSQL (or SQLite for local dev)
-- **Deployment:** Vercel/Netlify (frontend), Railway/Heroku/AWS EC2 (backend)
-- **Design:** Figma (see (https://www.figma.com/design/k6Yv3nJTRARvB16VVmGkW2/JuaLearn?t=PWEJQoeGFeT8JZzf-1))
+## Technology Stack
 
----
+* **Frontend:** React, TypeScript, MUI (Material-UI), CSS Modules, Vite
+* **Backend:** Django, Django REST Framework, SimpleJWT for authentication
+* **Database:** PostgreSQL for production (SQLite used for local development)
+* **Deployment:** Intended for Vercel/Netlify (frontend), Railway/Heroku/AWS EC2 (backend)
+* **Design:** Figma ([Design link](https://www.figma.com/design/k6Yv3nJTRARvB16VVmGkW2/JuaLearn?t=PWEJQoeGFeT8JZzf-1))
+
 
 ## Installation & Setup
 
 ### Prerequisites
 
-- Node.js (18+), npm/yarn
-- Python 3.10+, pip
-- PostgreSQL or SQLite
+* Node.js (version 18 or higher) and npm/yarn
+* Python 3.10 or higher and pip
+* PostgreSQL (recommended) or SQLite for development
 
-### 1. Clone the repository
+### Clone the repository
 
 ```bash
 git clone https://github.com/Nyiriek/Jualrn.git
 cd Jualrn
-````
+```
 
-### 2. Backend Setup
+### Backend Setup
 
 ```bash
-cd jualearn_backend
+cd ../jualearn_backend
 python -m venv venv
-source venv/bin/activate  # (or venv\Scripts\activate on Windows)
+source venv/bin/activate  # On Windows use: venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env  # Edit .env with your secrets
+cp .env.example .env      # Customize environment variables here
 
-# Migrate and seed database (optional)
+# Apply migrations and create superuser
 python manage.py migrate
-python manage.py createsuperuser  
+python manage.py createsuperuser
 
-# Run server
+# Start backend server
 python manage.py runserver
 ```
 
-### 3. Frontend Setup
+### Frontend Setup
 
 ```bash
 cd ./Jualearn
@@ -82,58 +84,56 @@ npm install
 npm run dev
 ```
 
----
 
-## UML Diagrams
-- **UseCase Diagram**:
 
-  ![Use case diagram](images/use-case.png)
+## UML Diagrams & Database Schema
 
-- **Entity Relational Diagram**:
+### Use Case Diagram
 
-  ![ER Diadgram](images/ERD.png)
+![Use case diagram](images/use-case.png)
 
-## Database Schema
-* **User:** id, username, email, password, role, first\_name, last\_name, profile\_picture
-* **Subject:** id, name, description
-* **Assignment:** id, title, description, subject, created\_by, assigned\_to, status
+### Entity Relationship Diagram
 
----
+![ER Diagram](images/ERD.png)
 
-## Testing Results
+### Database Tables Overview
 
-* Screenshots of passed tests and error cases can be found in the [`/testing-results`](./testing-results) folder.
-* Tested on Chrome, Firefox, and Android browser.
-* Performance tested on both high-end and low-end devices.
+* **User:** id, username, email, password, role, first\_name, last\_name, profile\_picture, institution, years\_of\_experience, phone\_number
+* **Subject:** id, name, description, created\_by, published
+* **Assignment:** id, title, description, subject, created\_by, assigned\_to, due\_date, published, grade
+* **Quiz:** id, title, description, subject, created\_by, due\_date, published
+* **QuizQuestion:** id, quiz, text, type
+* **QuizChoice:** id, question, text, is\_correct
+* **Enrollment:** id, student, subject, enrolled\_at
 
----
 
-## Analysis
 
-* **Objectives met:** Dashboard loads successfully for all roles; subject/assignment management works; authentication is secure.
-* **Limitations:** The AI assistant isn't fully functional yet since it requires curriculum aligned content for training.
-* **Responsiveness:** Fully functional on mobile and desktop (see screenshots).
+## Testing
 
----
+* Tested on Chrome, Firefox, and Android browsers.
+* Performance verified on both high-end and low-end devices.
+* Screenshots and logs available in `/testing-results`.
 
-## Discussion
 
-* Milestone 1 (UI & Navigation) enabled rapid onboarding for students and teachers.
-* Assignment and subject workflows empower remote learning and easy content updates.
-* Admin dashboard simplifies management of users and content (Not yet fully functional).
+## Project Status & Analysis
 
----
+* Core features like authentication, subject enrollment, assignment and quiz management, and notifications are implemented.
+* AI assistant is a work in progress and will enhance personalized learning.
+* Responsive UI delivers consistent experience on mobiles and desktops.
 
-## Recommendations & Future Work
 
-* Integrate offline learning and SMS notifications.
-* Continue training the AI model on the curriculum content
-* Add support for more languages.
-* Further optimize for ultra-low bandwidth.
-* Build a mobile app (APK) for offline-first users.
 
----
+## Future Enhancements
+
+* Offline learning support and SMS notifications.
+* AI model training with curriculum content.
+* Multi-language support for broader reach.
+* Performance optimizations for low bandwidth networks.
+* Mobile app (APK) for offline-first access.
+
 
 ## Contact
 
-Questions? Suggestions? Contact me at n.peat@alustudent.com
+For questions, feedback, or contributions, please contact:
+**[n.peat@alustudent.com](mailto:n.peat@alustudent.com)**
+

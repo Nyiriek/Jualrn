@@ -14,7 +14,16 @@ const subjects = [
 const StudentSubjects = () => (
   <div style={{ padding: 32 }}>
     <Typography variant="h4" gutterBottom>Subjects</Typography>
-    <Grid container columns={12} columnSpacing={3} rowSpacing={3} sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr 1fr" }, gap: 3 }}>
+    <Grid container spacing={3} sx={{
+      display: "grid",
+      gridTemplateColumns: {
+        xs: "1fr",
+        sm: "1fr 1fr",
+        md: "1fr 1fr 1fr",
+        lg: "1fr 1fr 1fr 1fr"
+      },
+      gap: 3,
+    }}>
       {subjects.map(subj => (
         <Card sx={{ height: "100%" }} key={subj.name}>
           <CardMedia

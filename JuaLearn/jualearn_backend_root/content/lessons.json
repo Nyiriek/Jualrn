@@ -1,0 +1,17 @@
+[
+  {
+    "subjectName": "Mathematics Secondary 4",
+    "title": "Complex Numbers",
+    "content": "# Complex Numbers\n\n## Learning Objectives\n- Define complex numbers and the imaginary unit i.\n- Perform arithmetic operations on complex numbers.\n- Plot complex numbers on the Argand diagram.\n- Find conjugates, modulus, and arguments.\n- Convert between Cartesian and polar forms.\n- Solve quadratic equations with complex roots.\n\n## Lesson Content\nA complex number is of the form a + bi, where a and b are real numbers, and i is the imaginary unit with the property i² = -1.\n\n### Arithmetic Operations\n- Addition: (a+bi) + (c+di) = (a+c) + (b+d)i\n- Multiplication: (a+bi)(c+di) = (ac - bd) + (ad + bc)i\n\n### Argand Diagram\nPlot complex numbers on the plane with the real part on the x-axis and imaginary part on the y-axis.\n\n### Polar Form\nExpress complex number as r(cosθ + i sinθ), where r = modulus, θ = argument.\n\n### Applications\nUse complex numbers to solve quadratics that have no real roots.\n\n(Include examples and exercises here)"
+  },
+  {
+    "subjectName": "Chemistry Secondary 4",
+    "title": "Identification of Ions and Gases",
+    "content": "# Identification of Ions and Gases\n\n## Learning Objectives\n- Identify cations and anions using reagent tests.\n- Conduct safe tests to identify common gases.\n- Understand properties and reactions of ions and gases.\n\n## Lesson Content\n### Tests for Cations\n- Use sodium hydroxide and ammonia solutions to form precipitates with characteristic colors.\n\n### Tests for Anions\n- Use silver nitrate to test for chloride ions (white precipitate).\n- Use barium nitrate for sulfate ions (white precipitate).\n\n### Gas Identification\n- Ammonia: turns red litmus blue.\n- Carbon dioxide: turns lime water milky.\n- Hydrogen: pops with a burning splint.\n\n(Include practical tips, safety precautions, and examples)"
+  },
+  {
+    "subjectName": "English Secondary 4",
+    "title": "Gender Issues",
+    "content": "# Gender Issues\n\n## Learning Objectives\n- Understand gender equality, stereotypes, and discrimination.\n- Analyze social impacts of gender inequality.\n- Build skills in reading comprehension, debate, and writing.\n\n## Lesson Content\nGender equality means equal rights and opportunities for all genders.\n\n### Social Issues\n- Child marriage and education barriers.\n- Gender-based violence.\n- Stereotypes limiting opportunities.\n\n### Government Initiatives\n- National policies promoting gender equality.\n\n### Language Practice\n- Vocabulary on gender and discrimination.\n- Reading comprehension with 'Birdsong' by Chimamanda Ngozi Adichie.\n\n(Include discussion questions and exercises)"
+  }
+]

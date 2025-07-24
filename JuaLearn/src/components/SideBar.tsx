@@ -14,6 +14,7 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import BookIcon from '@mui/icons-material/Book';
 import ForumIcon from '@mui/icons-material/Forum';
 import FeedbackIcon from '@mui/icons-material/Feedback';
+import QuizIcon from '@mui/icons-material/Quiz';
 import { useThemeMode } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -26,13 +27,17 @@ const menuConfig = {
     { text: 'Assignments', icon: <AssignmentIcon />, path: '/student/assignments' },
     { text: 'Progress', icon: <BarChartIcon />, path: '/student/progress' },
     { text: 'Forum', icon: <ForumIcon />, path: '/student/forum' },
+    { text: 'Quizzes', icon: <AssignmentIcon />, path: '/student/quizzes' },
+    { text: 'Grades', icon: <BarChartIcon />, path: '/student/grades' },
     { text: 'Feedback', icon: <FeedbackIcon />, path: '/student/feedback' },
   ],
   teacher: [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/teacher' },
-    { text: 'My Courses', icon: <BookIcon />, path: '/teacher/courses' },
+    { text: 'Courses', icon: <BookIcon />, path: '/teacher/courses' },
     { text: 'Gradebook', icon: <AssignmentIcon />, path: '/teacher/gradebook' },
     { text: 'Reports', icon: <BarChartIcon />, path: '/teacher/reports' },
+    { text: 'Assignments', icon: <AssignmentIcon />, path: '/teacher/assignments' },
+    { text: 'Quizzes', icon: <QuizIcon />, path: '/teacher/quizzes' },
     { text: 'Forum', icon: <ForumIcon />, path: '/teacher/forum' },
     { text: 'Feedback', icon: <FeedbackIcon />, path: '/teacher/feedback' },
   ]

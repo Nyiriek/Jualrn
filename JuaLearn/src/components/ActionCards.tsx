@@ -1,7 +1,7 @@
 // src/components/ActionCards.tsx
 import React from "react";
 import { Card, CardContent, Typography, Button, Stack } from "@mui/material";
-import { useThemeMode } from "../context/ThemeContext"; // <-- Import theme context
+import { useThemeMode } from "../context/ThemeContext";
 
 const actions = [
   { title: "Add Lesson", color: "primary" },
@@ -10,7 +10,7 @@ const actions = [
 ];
 
 const ActionCards: React.FC = () => {
-  const { mode } = useThemeMode(); // <-- Get current theme mode
+  const { mode } = useThemeMode();
 
   return (
     <Stack direction="row" spacing={2} sx={{ my: 2 }}>

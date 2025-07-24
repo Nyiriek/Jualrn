@@ -1,0 +1,176 @@
+[
+  {
+    "title": "Complex Numbers Quiz",
+    "subjectName": "Mathematics Secondary 4",
+    "due_date": "2025-09-30",
+    "description": "Quiz covering complex numbers including arithmetic operations, Argand diagram, conjugates, modulus, and polar form.",
+    "questions": [
+      {
+        "text": "What is the value of i³?",
+        "type": "multiple-choice",
+        "choices": [
+          {"text": "i"},
+          {"text": "-i", "is_correct": true},
+          {"text": "-1"},
+          {"text": "1"}
+        ]
+      },
+      {
+        "text": "Calculate (2 + 3i) + (4 - 5i).",
+        "type": "multiple-choice",
+        "choices": [
+          {"text": "6 - 2i", "is_correct": true},
+          {"text": "6 + 8i"},
+          {"text": "8 - 2i"},
+          {"text": "8 - 8i"}
+        ]
+      },
+      {
+        "text": "What is the conjugate of 3 - 7i?",
+        "type": "multiple-choice",
+        "choices": [
+          {"text": "3 + 7i", "is_correct": true},
+          {"text": "-3 + 7i"},
+          {"text": "7 + 3i"},
+          {"text": "7 - 3i"}
+        ]
+      },
+      {
+        "text": "Which quadrant does the complex number -2 + 4i lie in on the Argand diagram?",
+        "type": "multiple-choice",
+        "choices": [
+          {"text": "I"},
+          {"text": "II", "is_correct": true},
+          {"text": "III"},
+          {"text": "IV"}
+        ]
+      },
+      {
+        "text": "What is the modulus of 3 + 4i?",
+        "type": "multiple-choice",
+        "choices": [
+          {"text": "3"},
+          {"text": "4"},
+          {"text": "5", "is_correct": true},
+          {"text": "7"}
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Identification of Ions and Gases Quiz",
+    "subjectName": "Chemistry Secondary 4",
+    "due_date": "2025-10-05",
+    "description": "Quiz on tests for cations, anions and identification of common gases in laboratory settings.",
+    "questions": [
+      {
+        "text": "What colour precipitate forms when copper ions react with NaOH?",
+        "type": "multiple-choice",
+        "choices": [
+          {"text": "Blue", "is_correct": true},
+          {"text": "White"},
+          {"text": "Green"},
+          {"text": "Yellow"}
+        ]
+      },
+      {
+        "text": "How do you safely smell a gas in the lab?",
+        "type": "multiple-choice",
+        "choices": [
+          {"text": "Sniff directly"},
+          {"text": "Waft the gas towards your nose", "is_correct": true},
+          {"text": "Hold gas close to face"},
+          {"text": "Ignore safety"}
+        ]
+      },
+      {
+        "text": "What gas turns lime water milky?",
+        "type": "multiple-choice",
+        "choices": [
+          {"text": "Ammonia"},
+          {"text": "Carbon dioxide", "is_correct": true},
+          {"text": "Oxygen"},
+          {"text": "Chlorine"}
+        ]
+      },
+      {
+        "text": "Which reagent is used to test for chloride ions?",
+        "type": "multiple-choice",
+        "choices": [
+          {"text": "Silver nitrate", "is_correct": true},
+          {"text": "Barium nitrate"},
+          {"text": "Sodium hydroxide"},
+          {"text": "Hydrochloric acid"}
+        ]
+      },
+      {
+        "text": "How do you identify ammonia gas?",
+        "type": "multiple-choice",
+        "choices": [
+          {"text": "Turns moist red litmus paper blue", "is_correct": true},
+          {"text": "Produces a ‘pop’ sound"},
+          {"text": "Turns lime water milky"},
+          {"text": "Bleaches litmus paper"}
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Gender Issues Quiz",
+    "subjectName": "English Secondary 4",
+    "due_date": "2025-10-10",
+    "description": "Quiz on concepts of gender equality, discrimination, stereotypes, and social issues related to gender.",
+    "questions": [
+      {
+        "text": "What does gender equality mean?",
+        "type": "multiple-choice",
+        "choices": [
+          {"text": "Equal rights and opportunities for all genders", "is_correct": true},
+          {"text": "Only equal pay for women"},
+          {"text": "Women having more rights than men"},
+          {"text": "Men and women doing different jobs"}
+        ]
+      },
+      {
+        "text": "Name a challenge girls face in education.",
+        "type": "multiple-choice",
+        "choices": [
+          {"text": "Lack of interest"},
+          {"text": "Child marriage", "is_correct": true},
+          {"text": "Too many schools"},
+          {"text": "No teachers"}
+        ]
+      },
+      {
+        "text": "What is a stereotype?",
+        "type": "multiple-choice",
+        "choices": [
+          {"text": "A fixed oversimplified idea about a group", "is_correct": true},
+          {"text": "A type of discrimination"},
+          {"text": "A government policy"},
+          {"text": "An educational program"}
+        ]
+      },
+      {
+        "text": "Which harmful practice affects women?",
+        "type": "multiple-choice",
+        "choices": [
+          {"text": "Female genital mutilation", "is_correct": true},
+          {"text": "Education"},
+          {"text": "Voting"},
+          {"text": "Sports"}
+        ]
+      },
+      {
+        "text": "Who wrote 'Birdsong'?",
+        "type": "multiple-choice",
+        "choices": [
+          {"text": "Chimamanda Ngozi Adichie", "is_correct": true},
+          {"text": "Wole Soyinka"},
+          {"text": "Ngũgĩ wa Thiong'o"},
+          {"text": "Chinua Achebe"}
+        ]
+      }
+    ]
+  }
+]

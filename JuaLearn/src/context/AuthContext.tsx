@@ -1,14 +1,15 @@
-// context/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { setAccessTokenUpdater, setRefreshTokenUpdater } from '../services/tokenService';
 
 export interface UserInfo {
+  id: number;
   username: string;
   email: string;
   role: 'student' | 'teacher' | 'admin';
   firstName: string;
   lastName?: string;
   profilePicture?: string;
-  access?: string; 
+  access?: string;
   refresh?: string;
 }
 
@@ -27,37 +28,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
 
-  // On mount, load from localStorage
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const storedAccess = localStorage.getItem("accessToken");
-    const storedRefresh = localStorage.getItem("refreshToken");
+    const storedUser = localStorage.getItem('user');
+    const storedAccess = localStorage.getItem('accessToken');
+    const storedRefresh = localStorage.getItem('refreshToken');
+
     if (storedUser && storedAccess && storedRefresh) {
       setUser(JSON.parse(storedUser));
       setAccessToken(storedAccess);
       setRefreshToken(storedRefresh);
     }
+
+    // Connect tokenService setters to update React state on token refresh
+    setAccessTokenUpdater(setAccessToken);
+    setRefreshTokenUpdater(setRefreshToken);
   }, []);
 
-  // Login: store in state + localStorage
-  const login = (userInfo: any) => {
+  const login = (userInfo: UserInfo) => {
     setUser(userInfo);
-    setAccessToken(userInfo.access);
-    setRefreshToken(userInfo.refresh);
+    setAccessToken(userInfo.access ?? null);
+    setRefreshToken(userInfo.refresh ?? null);
 
-    localStorage.setItem("user", JSON.stringify(userInfo));
-    localStorage.setItem("accessToken", userInfo.access);
-    localStorage.setItem("refreshToken", userInfo.refresh);
+    localStorage.setItem('user', JSON.stringify(userInfo));
+    if (userInfo.access) localStorage.setItem('accessToken', userInfo.access);
+    if (userInfo.refresh) localStorage.setItem('refreshToken', userInfo.refresh);
   };
 
-  // Logout: clear everything
   const logout = () => {
     setUser(null);
     setAccessToken(null);
     setRefreshToken(null);
-    localStorage.removeItem("user");
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    localStorage.removeItem('user');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    window.location.href = '/login'; // redirect on logout
   };
 
   return (
@@ -67,13 +71,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) throw new Error('useAuth must be used within AuthProvider');
   return context;
-};
-
-export const useIsAuthenticated = () => {
-  const { user } = useAuth();
-  return !!user;
 };

@@ -1,4 +1,3 @@
-// src/pages/TeacherLogin.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -17,23 +16,22 @@ const TeacherLogin = () => {
     e.preventDefault();
     setError('');
     try {
-      const res = await api.post('auth/login/', {
+      const res = await api.post('token/', {
         username: email,
         password,
       });
 
-      // Save JWT tokens to localStorage for axios to use
-      localStorage.setItem('accessToken', res.data.access);
-      localStorage.setItem('refreshToken', res.data.refresh);
-
-      // Store user info in context (add more fields if you want)
+      // Pass entire user info + tokens object to login
       login({
-        username: res.data.username ?? email,
-        email: res.data.email ?? '',
+        id: res.data.id,
+        username: res.data.username,
+        email: res.data.email,
         role: res.data.role,
         firstName: res.data.firstName,
         lastName: res.data.lastName,
         profilePicture: res.data.profilePicture,
+        access: res.data.access,
+        refresh: res.data.refresh,
       });
 
       navigate('/teacher');
