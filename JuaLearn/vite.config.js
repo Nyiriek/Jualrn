@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate', // Automatically update the service worker
+      registerType: 'autoUpdate', // 
       includeAssets: ['favicon.svg', 'robots.txt', 'apple-touch-icon.png'], // include static assets
       manifest: {
         name: 'JuaLearn',

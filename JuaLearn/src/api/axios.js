@@ -2,7 +2,7 @@ import axios from 'axios';
 import { updateAccessToken, updateRefreshToken } from '../services/tokenService';
 
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/',
 });
 
 api.interceptors.request.use(
@@ -31,7 +31,7 @@ api.interceptors.response.use(
       }
 
       try {
-        const response = await axios.post('http://127.0.0.1:8000/api/token/refresh/', {
+        const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/'}token/refresh/`, {
           refresh: refreshToken,
         });
 
