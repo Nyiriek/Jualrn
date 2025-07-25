@@ -5,7 +5,7 @@ import { Box, Typography, CircularProgress, Table, TableBody, TableCell, TableHe
 type AssignmentGrade = {
   id: number;
   title: string;
-  subject: { id: number; name: string };
+  subject?: { id: number; name: string } | null;
   grade: number;
   due_date: string;
 };
@@ -13,7 +13,7 @@ type AssignmentGrade = {
 type QuizGrade = {
   id: number;
   title: string;
-  subject: { id: number; name: string };
+  subject?: { id: number; name: string } | null;
   grade: number;
   due_date: string;
 };
@@ -65,7 +65,7 @@ const StudentGrades: React.FC = () => {
             {assignmentGrades.map((a) => (
               <TableRow key={a.id}>
                 <TableCell>{a.title}</TableCell>
-                <TableCell>{a.subject.name}</TableCell>
+                <TableCell>{a.subject ? a.subject.name : 'N/A'}</TableCell>
                 <TableCell>{a.due_date}</TableCell>
                 <TableCell>{a.grade}</TableCell>
               </TableRow>
@@ -91,7 +91,7 @@ const StudentGrades: React.FC = () => {
             {quizGrades.map((q) => (
               <TableRow key={q.id}>
                 <TableCell>{q.title}</TableCell>
-                <TableCell>{q.subject.name}</TableCell>
+                <TableCell>{q.subject ? q.subject.name : 'N/A'}</TableCell>
                 <TableCell>{q.due_date}</TableCell>
                 <TableCell>{q.grade}</TableCell>
               </TableRow>
