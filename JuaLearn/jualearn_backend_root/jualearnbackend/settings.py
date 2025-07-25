@@ -68,7 +68,7 @@ WSGI_APPLICATION = 'jualearnbackend.wsgi.application'
 # Database configuration: use DATABASE_URL env var or fallback to local settings
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgresql://jualearn_user:jualearn@localhost:5432/jualearn_db',
+        default=os.getenv('DATABASE_URL'),
         conn_max_age=600,
         ssl_require=True if os.getenv('DATABASE_URL') else False
     )
