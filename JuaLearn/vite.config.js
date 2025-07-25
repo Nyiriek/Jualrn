@@ -12,8 +12,8 @@ export default defineConfig({
         'favicon.svg',
         'robots.txt',
         'apple-touch-icon.png',
-        'assets/favicon_io/android-chrome-192x192.png',
-        'assets/favicon_io/android-chrome-512x512.png'
+        'favicon_io/android-chrome-192x192.png',
+        'favicon_io/android-chrome-512x512.png',
       ],
       manifest: {
         name: 'JuaLearn',
@@ -21,18 +21,18 @@ export default defineConfig({
         description: 'AI-powered E-Learning Platform',
         theme_color: '#23395d',
         background_color: '#ffffff',
+        display: 'standalone',
         lang: 'en',
         start_url: '/',
         scope: '/',
-        display: 'standalone',
         icons: [
           {
-            src: 'assets/favicon_io/android-chrome-192x192.png',
+            src: '/favicon_io/android-chrome-192x192.png',
             sizes: '192x192',
             type: 'image/png',
           },
           {
-            src: 'assets/favicon_io/android-chrome-512x512.png',
+            src: '/favicon_io/android-chrome-512x512.png',
             sizes: '512x512',
             type: 'image/png',
           },
