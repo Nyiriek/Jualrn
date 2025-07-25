@@ -54,7 +54,6 @@ const AdminLessons: React.FC = () => {
       const res = await api.get('/subjects/');
       setSubjects(res.data);
     } catch {
-      // ignore
     }
   };
 
