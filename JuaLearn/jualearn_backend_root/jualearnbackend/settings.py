@@ -129,3 +129,15 @@ DJOSER = {
 }
 
 CONTENT_FOLDER = os.path.join(BASE_DIR, 'content')
+
+
+# CORS headers configuration
+CORS_ALLOWED_ORIGINS = [
+    "https://jua-lrn.onrender.com",
+]
+
+# Optional: allow all origins (only for debugging, not recommended for production)
+# CORS_ALLOW_ALL_ORIGINS = True
+
+# Ensure CORS headers are sent on all responses, including errors
+CORS_ALLOW_CREDENTIALS = True
