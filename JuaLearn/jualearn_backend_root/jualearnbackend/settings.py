@@ -100,12 +100,13 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = True 
-CORS_ALLOW_ALL_ORIGINS = [
-    'http://localhost:3000',
-    'https://jua-lrn.onrender.com',
-    'https://jua-lern.onrender.com'
-]
+CORS_ALLOW_ALL_ORIGINS = True
+
+# CORS_ALLOW_ALL_ORIGINS = [
+#     'http://localhost:3000',
+#     'https://jua-lrn.onrender.com',
+#     'https://jua-lern.onrender.com'
+# ]
 
 # Custom user model
 AUTH_USER_MODEL = 'users.User'
