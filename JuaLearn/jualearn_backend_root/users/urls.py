@@ -48,6 +48,5 @@ urlpatterns = [
     path('bulk-upload/', bulk_upload, name='bulk-upload'),
 ]
 
-urlpatterns += router.urls
 urlpatterns += quizzes_router.urls
 urlpatterns += questions_router.urls
