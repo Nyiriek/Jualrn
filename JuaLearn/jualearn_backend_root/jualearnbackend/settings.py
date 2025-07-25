@@ -68,11 +68,11 @@ WSGI_APPLICATION = 'jualearnbackend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'jualearn_db',
-        'USER': 'jualearn_user',
-        'PASSWORD': 'jualearn',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.getenv('DB_NAME', 'jualearn_db'),
+        'USER': os.getenv('DB_USER', 'jualearn_user'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'jualearn'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
 
