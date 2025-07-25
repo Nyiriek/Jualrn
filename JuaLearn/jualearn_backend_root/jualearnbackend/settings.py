@@ -102,11 +102,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = True
 
-# CORS_ALLOW_ALL_ORIGINS = [
-#     'http://localhost:3000',
-#     'https://jua-lrn.onrender.com',
-#     'https://jua-lern.onrender.com'
-# ]
+ALLOWED_HOSTS = ['jua-lern.onrender.com', 'localhost', '127.0.0.1']
+
 
 # Custom user model
 AUTH_USER_MODEL = 'users.User'
