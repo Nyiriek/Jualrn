@@ -100,9 +100,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = True
-
-ALLOWED_HOSTS = ['jua-lern.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost 127.0.0.1 jua-lern.onrender.com').split()
 
 
 # Custom user model
