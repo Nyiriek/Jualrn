@@ -7,21 +7,32 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate', // 
-      includeAssets: ['favicon.svg', 'robots.txt', 'apple-touch-icon.png'], // include static assets
+      registerType: 'autoUpdate',
+      includeAssets: [
+        'favicon.svg',
+        'robots.txt',
+        'apple-touch-icon.png',
+        'assets/favicon_io/android-chrome-192x192.png',
+        'assets/favicon_io/android-chrome-512x512.png'
+      ],
       manifest: {
         name: 'JuaLearn',
         short_name: 'JuaLearn',
         description: 'AI-powered E-Learning Platform',
         theme_color: '#23395d',
+        background_color: '#ffffff',
+        lang: 'en',
+        start_url: '/',
+        scope: '/',
+        display: 'standalone',
         icons: [
           {
-            src: 'pwa-192x192.png',
+            src: 'assets/favicon_io/android-chrome-192x192.png',
             sizes: '192x192',
             type: 'image/png',
           },
           {
-            src: 'pwa-512x512.png',
+            src: 'assets/favicon_io/android-chrome-512x512.png',
             sizes: '512x512',
             type: 'image/png',
           },
