@@ -33,6 +33,9 @@ const StudentDashboard: React.FC = () => {
   const isTablet = useMediaQuery('(max-width:768px)');
   const isDesktop = useMediaQuery('(max-width:1200px)');
   const isLargeDesktop = useMediaQuery('(max-width:1400px)');
+  
+  const isMobile = useMediaQuery('(max-width:700px)');
+  const topBarHeight = isMobile ? 56 : 72;
 
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loadingEnrollments, setLoadingEnrollments] = useState(true);
@@ -68,7 +71,7 @@ const StudentDashboard: React.FC = () => {
       : "0 2px 8px rgba(0,0,0,0.06)",
     borderRadius: "8px",
     padding: (isSmartphone || isTablet) ? "1rem" : "1.5rem",
-    flex: isSmartphone || isTablet ? "none" : 1,
+    flex: isSmartphone || isTablet ? "none" : 2,
     width: isSmartphone ? "100%" : isTablet ? "48%" : "auto",
     margin: isSmartphone || isTablet ? "0 0 1rem 0" : "0 0.75rem",
     textAlign: "center" as const,
@@ -87,7 +90,15 @@ const StudentDashboard: React.FC = () => {
   };
 
   return (
-    <div className="dashboard-container" style={{ padding: isSmartphone ? '0.5rem' : '1rem 2rem' }}>
+    <div
+      className="dashboard-container"
+      style={{
+        padding: isSmartphone ? '0.5rem' : '1rem 2rem',
+        paddingTop: topBarHeight + (isMobile ? 8 : 16),
+        boxSizing: 'border-box',
+        minHeight: '100vh',
+      }}
+    >
       <Header title={`Welcome, ${user?.firstName || "Student"}`} />
       
       <section style={{ marginBottom: isSmartphone ? "1rem" : "2rem" }}>
