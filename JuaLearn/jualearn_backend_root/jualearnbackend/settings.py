@@ -134,6 +134,8 @@ CONTENT_FOLDER = os.path.join(BASE_DIR, 'content')
 # CORS headers configuration
 CORS_ALLOWED_ORIGINS = [
     "https://jua-lrn.onrender.com",
+    "https://jua-lern.onrender.com",
+    "http://localhost:3000",
 ]
 
 # Optional: allow all origins (only for debugging, not recommended for production)
