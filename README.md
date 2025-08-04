@@ -6,8 +6,8 @@ JuaLearn is an AI-powered e-learning platform designed to provide high-quality e
 
 ## Demo
 
-* **[Demo Video (YouTube/Drive Link)](https://www.youtube.com/watch?v=BMOncSmaMIA)**
-* *Note:* The website is currently under active development and not yet deployed to a public URL.
+* **[Demo Video (YouTube/Drive Link)](https://youtu.be/sA443Wir9mU)**
+* **[Deployed website (Website link)](https://jua-lrn.onrender.com/)**
 
 ---
 
