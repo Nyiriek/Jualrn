@@ -175,6 +175,8 @@ const QuizQuestions: React.FC<Props> = ({ quizId }) => {
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
           <TextField
+            id="legacy-quiz-question-text"
+            name="legacyQuizQuestionText"
             label="Question Text"
             fullWidth
             value={form.text}
@@ -186,6 +188,8 @@ const QuizQuestions: React.FC<Props> = ({ quizId }) => {
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel id="type-label">Type</InputLabel>
             <Select
+              id="legacy-quiz-question-type"
+              name="legacyQuizQuestionType"
               labelId="type-label"
               value={form.type}
               label="Type"

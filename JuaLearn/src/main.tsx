@@ -2,19 +2,28 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import './index.css';
 import App from './App';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { registerSW } from 'virtual:pwa-register'
 
-const updateSW = registerSW({
-  onNeedRefresh() {
-    console.log("New content available, please refresh.");
-  },
-  onOfflineReady() {
-    console.log("App ready to work offline.");
-  }
-});
+if (import.meta.env.PROD) {
+  registerSW({
+    onNeedRefresh() {
+      console.log("New content available, please refresh.");
+    },
+    onOfflineReady() {
+      console.log("App ready to work offline.");
+    }
+  });
+} else if ('serviceWorker' in navigator) {
+  // Development must always use the newest Vite modules. This also removes a
+  // worker registered by an earlier production build on localhost.
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((registration) => registration.unregister());
+  });
+}
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

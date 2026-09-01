@@ -1,20 +1,15 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Paper,
-  Typography,
-  TextField,
-  Button,
-  Alert,
-  CircularProgress,
-} from "@mui/material";
+import { Box, Typography, TextField, Button, Alert, CircularProgress, IconButton, InputAdornment } from "@mui/material";
+import { ArrowBack, AdminPanelSettingsOutlined, Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../api/axios";
+import "../styles/authPages.css";
 
 const AdminLogin: React.FC = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -46,7 +41,9 @@ const AdminLogin: React.FC = () => {
           refresh: data.refresh,
         });
 
-        navigate("/admin");
+        // Store the session first, then replace the login route so the admin
+        // guard never evaluates against a stale login history entry.
+        navigate("/admin", { replace: true });
       } else {
         setError(data.detail || "Login failed. Please check your credentials.");
       }
@@ -62,19 +59,13 @@ const AdminLogin: React.FC = () => {
   };
 
   return (
-    <Box
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      minHeight="100vh"
-      bgcolor="#f5f6fa"
-    >
-      <Paper elevation={4} sx={{ p: 5, width: "100%", maxWidth: 370 }}>
-        <Typography variant="h5" fontWeight={700} textAlign="center" gutterBottom>
-          Admin Login
-        </Typography>
-        <form onSubmit={handleSubmit}>
+    <Box className="auth-page"><Box className="auth-shell auth-compact auth-admin">
+      <Box className="auth-aside"><div className="auth-brand"><span className="auth-brand-mark"><AdminPanelSettingsOutlined fontSize="small" /></span><span>Jua<span>Learn</span></span></div><div className="auth-aside-copy"><Typography variant="overline" fontWeight={800} letterSpacing=".12em">Administration</Typography><h1>Keep learning quality on track.</h1><p>Review published courses, manage users and maintain a trusted learning platform.</p></div><div className="auth-aside-note"><i />Restricted administration access.</div></Box>
+      <Box className="auth-form-card"><Button className="auth-back" startIcon={<ArrowBack />} onClick={() => navigate('/')}>Back to JuaLearn</Button><span className="auth-eyebrow">Separate administration portal</span><h2>Admin sign in</h2><p>Use your administrator credentials to continue. Student and teacher accounts use their own sign-in portal.</p>
+        <form onSubmit={handleSubmit} className="auth-form">
           <TextField
+            id="admin-login-username"
+            name="username"
             label="Username"
             fullWidth
             variant="outlined"
@@ -85,21 +76,20 @@ const AdminLogin: React.FC = () => {
             required
           />
           <TextField
+            id="admin-login-password"
+            name="password"
             label="Password"
             fullWidth
             variant="outlined"
             margin="normal"
-            type="password"
+            type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
             required
+            slotProps={{ input: { endAdornment: <InputAdornment position="end"><IconButton aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((shown) => !shown)} edge="end">{showPassword ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment> } }}
           />
-          {error && (
-            <Alert severity="error" sx={{ mt: 2, mb: 1 }}>
-              {error}
-            </Alert>
-          )}
+          {error && <Alert className="auth-error" severity="error">{error}</Alert>}
           <Button
             variant="contained"
             color="primary"
@@ -111,8 +101,8 @@ const AdminLogin: React.FC = () => {
             {submitting ? <CircularProgress size={24} /> : "Login"}
           </Button>
         </form>
-      </Paper>
-    </Box>
+      </Box>
+    </Box></Box>
   );
 };
 

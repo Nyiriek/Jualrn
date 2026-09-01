@@ -1,44 +1,37 @@
-import React, { useState, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   AppBar,
   Toolbar,
   Typography,
   Box,
   IconButton,
-  Avatar,
   InputBase,
   Paper,
-  Popper,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemButton,
-  CircularProgress,
-  Drawer,
   useMediaQuery,
   ClickAwayListener,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import { useAuth } from "../context/AuthContext";
-import ProfileMenu from "./ProfileMenu";
 import ProfileModal from "./ProfileModal";
-import NotificationBell from "./NotificationBell";
-import ThemeToggle from "./ThemeToggle";
 import { useThemeMode } from "../context/ThemeContext";
 import logoImg from "../assets/logo.jpeg";
 import axios from "../api/axios";
+import { profilePictureUrl } from "../utils/profilePicture";
 
 const TopBar: React.FC = () => {
-  const { user, login, logout } = useAuth();
+  const { user, login, accessToken, refreshToken } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [profilePicture, setProfilePicture] = useState<string | undefined>(user?.profilePicture);
   const [imageFile, setImageFile] = useState<File | undefined>(undefined);
   const { mode } = useThemeMode();
+  const usesStudentTheme = user?.role === "student";
+  const usesTeacherTheme = user?.role === "teacher";
+  const usesDashboardTheme = usesStudentTheme || usesTeacherTheme;
 
   const isMobile = useMediaQuery("(max-width:700px)");
+  const isCompactNavigation = useMediaQuery("(max-width:900px)");
 
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -50,6 +43,25 @@ const TopBar: React.FC = () => {
 
   // State to toggle expanded search input on mobile
   const [searchExpanded, setSearchExpanded] = useState(false);
+  const [navigationOpen, setNavigationOpen] = useState(false);
+
+  useEffect(() => {
+    const openProfile = () => setProfileOpen(true);
+    window.addEventListener("jualearn:open-profile", openProfile);
+    return () => window.removeEventListener("jualearn:open-profile", openProfile);
+  }, []);
+
+  useEffect(() => {
+    setProfilePicture(profilePictureUrl(user?.profilePicture));
+  }, [user?.profilePicture]);
+
+  useEffect(() => {
+    const updateNavigationState = (event: Event) => {
+      setNavigationOpen(Boolean((event as CustomEvent<boolean>).detail));
+    };
+    window.addEventListener("jualearn:navigation-state", updateNavigationState);
+    return () => window.removeEventListener("jualearn:navigation-state", updateNavigationState);
+  }, []);
 
   const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -101,63 +113,9 @@ const TopBar: React.FC = () => {
     setSearchResults([]);
   };
 
-  // Colors and styles
-  const profileBgColor = mode === "dark" ? "#fff" : "#23395d";
-  const profileColor = mode === "dark" ? "#23395d" : "#fff";
-  const profileGlow = mode === "dark" ? { boxShadow: "0 0 8px 2px #fff" } : {};
-  const searchBg = mode === "dark" ? "#23262d" : "#f3f6fb";
-  const searchTextColor = mode === "dark" ? "#fff" : "#23395d";
+  const searchBg = usesStudentTheme ? "var(--student-surface)" : usesTeacherTheme ? "var(--teacher-surface)" : mode === "dark" ? "#23262d" : "#f3f6fb";
+  const searchTextColor = usesStudentTheme ? "var(--student-text)" : usesTeacherTheme ? "var(--teacher-text)" : mode === "dark" ? "#fff" : "#23395d";
   const searchBorder = mode === "dark" ? "#3c5687" : "#e3e3e3";
-
-  const mobileMenu = (
-    <Box sx={{ width: 220, pt: 2 }}>
-      <Box sx={{ display: "flex", alignItems: "center", flexDirection: "column", mb: 2 }}>
-        <Avatar
-          src={profilePicture || user?.profilePicture || undefined}
-          alt={user?.username}
-          sx={{
-            width: 56,
-            height: 56,
-            bgcolor: profileBgColor,
-            color: profileColor,
-            ...profileGlow,
-            border: mode === "dark" ? "2px solid #fff" : "2px solid #23395d",
-          }}
-        >
-          {!(profilePicture || user?.profilePicture) &&
-            (user?.firstName?.[0]?.toUpperCase() ||
-              user?.username?.[0]?.toUpperCase() ||
-              "U")}
-        </Avatar>
-        <Typography sx={{ mt: 1, fontWeight: 600 }}>
-          {user?.firstName} {user?.lastName}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {user?.role}
-        </Typography>
-      </Box>
-      <List>
-        <ListItem>
-          <NotificationBell />
-          <Typography sx={{ ml: 1 }}>Notifications</Typography>
-        </ListItem>
-        <ListItem
-          component="button"
-          onClick={() => {
-            setProfileOpen(true);
-            setDrawerOpen(false);
-          }}
-        >
-          <ListItemText primary="Edit Profile" />
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton onClick={logout}>
-            <ListItemText primary="Logout" />
-          </ListItemButton>
-        </ListItem>
-      </List>
-    </Box>
-  );
 
   return (
     <>
@@ -167,7 +125,7 @@ const TopBar: React.FC = () => {
         elevation={1}
         sx={{
           borderBottom: "1px solid #e3e3e3",
-          background: mode === "dark" ? "#23262d" : "#fff",
+          background: usesStudentTheme ? "var(--student-surface)" : usesTeacherTheme ? "var(--teacher-surface)" : mode === "dark" ? "#23262d" : "#fff",
           zIndex: 1201,
           minHeight: isMobile ? 56 : 72,
         }}
@@ -176,25 +134,14 @@ const TopBar: React.FC = () => {
           sx={{
             display: "flex",
             justifyContent: "space-between",
-            gap: 2,
+            gap: isMobile ? 0.5 : 2,
             minHeight: isMobile ? 56 : 72,
             px: isMobile ? 1 : 3,
+            pl: isMobile ? 1 : 3,
           }}
         >
-          {/* Hamburger on mobile */}
-          {isMobile && (
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              onClick={() => setDrawerOpen(true)}
-              sx={{ mr: 1 }}
-            >
-              <MenuIcon />
-            </IconButton>
-          )}
           {/* Logo + Title */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
             <img
               src={logoImg}
               alt="JuaLearn Logo"
@@ -223,12 +170,12 @@ const TopBar: React.FC = () => {
             {/* --- SEARCH BAR --- */}
             {isMobile ? (
               <ClickAwayListener onClickAway={handleClickAway}>
-                <Box sx={{ position: "relative", ml: 2, display: "flex", alignItems: "center" }}>
+                <Box sx={{ position: "relative", ml: 0, display: "flex", alignItems: "center" }}>
                   {!searchExpanded && (
                     <IconButton
                       onClick={handleSearchIconClick}
                       aria-label="open search"
-                      sx={{ color: mode === "dark" ? "#fff" : "#23395d" }}
+                      sx={{ color: usesDashboardTheme ? (usesStudentTheme ? "var(--student-text)" : "var(--teacher-text)") : mode === "dark" ? "#fff" : "#23395d" }}
                     >
                       <SearchIcon />
                     </IconButton>
@@ -243,7 +190,11 @@ const TopBar: React.FC = () => {
                         background: searchBg,
                         border: `1.5px solid ${searchBorder}`,
                         borderRadius: "999px",
-                        minWidth: 140,
+                        position: "fixed",
+                        top: 10,
+                        left: 64,
+                        right: 8,
+                        zIndex: 1300,
                         height: 36,
                         boxShadow: "none",
                         flexGrow: 1,
@@ -263,7 +214,7 @@ const TopBar: React.FC = () => {
                           fontSize: 14,
                           "& input": { fontWeight: 500 },
                         }}
-                        inputProps={{ "aria-label": "search" }}
+                        inputProps={{ "aria-label": "search", name: "site-search" }}
                       />
                       <IconButton
                         type="submit"
@@ -308,7 +259,7 @@ const TopBar: React.FC = () => {
                         fontSize: 16,
                         "& input": { fontWeight: 500 },
                       }}
-                      inputProps={{ "aria-label": "search" }}
+                      inputProps={{ "aria-label": "search", name: "site-search" }}
                     />
                     <IconButton
                       type="submit"
@@ -328,51 +279,20 @@ const TopBar: React.FC = () => {
           {/* Spacer */}
           <Box sx={{ flex: 1 }} />
 
-          {/* Icons always visible */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: isMobile ? 1 : 2 }}>
-            <ThemeToggle />
-            <NotificationBell />
-            <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ p: 0 }}>
-              <Avatar
-                src={profilePicture || user?.profilePicture || undefined}
-                alt={user?.username}
-                sx={{
-                  width: isMobile ? 32 : 40,
-                  height: isMobile ? 32 : 40,
-                  bgcolor: profileBgColor,
-                  color: profileColor,
-                  ...profileGlow,
-                  border: mode === "dark" ? "2px solid #fff" : "2px solid #23395d",
-                }}
+          {/* Account actions live in the navigation drawer. */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: isMobile ? 0.5 : 2, flexShrink: 0 }}>
+            {isCompactNavigation && (
+              <IconButton
+                aria-label={navigationOpen ? "close navigation" : "open navigation"}
+                onClick={() => window.dispatchEvent(new Event(navigationOpen ? "jualearn:close-navigation" : "jualearn:open-navigation"))}
+                sx={{ color: usesStudentTheme ? "var(--student-text)" : mode === "dark" ? "#fff" : "#23395d" }}
               >
-                {!(profilePicture || user?.profilePicture) &&
-                  (user?.firstName?.[0]?.toUpperCase() ||
-                    user?.username?.[0]?.toUpperCase() ||
-                    "U")}
-              </Avatar>
-            </IconButton>
-            <ProfileMenu
-              anchorEl={anchorEl}
-              onClose={() => setAnchorEl(null)}
-              onEdit={() => {
-                setProfileOpen(true);
-                setAnchorEl(null);
-              }}
-              onLogout={logout}
-            />
+                {navigationOpen ? <CloseIcon /> : <MenuIcon />}
+              </IconButton>
+            )}
           </Box>
         </Toolbar>
       </AppBar>
-
-      {/* MOBILE DRAWER */}
-      <Drawer
-        anchor="left"
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        sx={{ zIndex: 1500 }}
-      >
-        {mobileMenu}
-      </Drawer>
 
       {/* Profile modal */}
       <ProfileModal
@@ -384,24 +304,38 @@ const TopBar: React.FC = () => {
           role: user?.role ?? "",
           firstName: user?.firstName,
           lastName: user?.lastName,
-          profilePicture: profilePicture || user?.profilePicture,
+          profilePicture: profilePicture || profilePictureUrl(user?.profilePicture),
         }}
         onProfilePictureChange={(file: File) => {
           setProfilePicture(URL.createObjectURL(file));
           setImageFile(file);
         }}
-        onSave={async (updates: any) => {
-          if (imageFile) updates.profilePicture = imageFile;
+        onSave={async (updates) => {
+          if (!user) return;
           try {
-            await fetch("/api/user/update", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(updates),
+            const formData = new FormData();
+            formData.append("username", updates.username.trim());
+            formData.append("email", updates.email.trim());
+            formData.append("first_name", updates.firstName.trim());
+            formData.append("last_name", updates.lastName.trim());
+            if (imageFile) formData.append("profile_picture", imageFile);
+            const response = await axios.patch("/profile/", formData);
+            login({
+              ...user,
+              username: response.data.username,
+              email: response.data.email,
+              firstName: response.data.first_name || "",
+              lastName: response.data.last_name || "",
+              profilePicture: profilePictureUrl(response.data.profile_picture) || profilePicture,
+              access: accessToken || undefined,
+              refresh: refreshToken || undefined,
             });
-            login({ ...user, ...updates });
+            setProfilePicture(profilePictureUrl(response.data.profile_picture) || profilePicture);
+            setImageFile(undefined);
             setProfileOpen(false);
           } catch (error) {
             console.error("Failed to update profile:", error);
+            throw error;
           }
         }}
       />

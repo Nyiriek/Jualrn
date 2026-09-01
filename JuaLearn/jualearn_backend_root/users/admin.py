@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Subject, Assignment
+from .models import User, Subject, Assignment, LearningResource
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
@@ -26,3 +26,10 @@ class AssignmentAdmin(admin.ModelAdmin):
             'fields': ('title', 'description', 'subject', 'created_by', 'due_date', 'grade')
         }),
     )
+
+
+@admin.register(LearningResource)
+class LearningResourceAdmin(admin.ModelAdmin):
+    list_display = ('title', 'subject_area', 'resource_type', 'is_published', 'created_at')
+    list_filter = ('subject_area', 'resource_type', 'is_published')
+    search_fields = ('title', 'description', 'source')

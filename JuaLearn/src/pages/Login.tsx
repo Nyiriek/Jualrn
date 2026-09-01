@@ -1,116 +1,16 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Typography,
-  Button,
-  Paper,
-  Divider,
-  Avatar
-} from '@mui/material';
-import SchoolIcon from '@mui/icons-material/School';
-import PersonIcon from '@mui/icons-material/Person';
+import { Box, Typography, Button, Paper } from '@mui/material';
+import SchoolIcon from '@mui/icons-material/SchoolOutlined';
+import PersonIcon from '@mui/icons-material/AutoStoriesOutlined';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import '../styles/authPages.css';
 
 const Login = () => {
   const navigate = useNavigate();
 
   return (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      minHeight="100vh"
-      bgcolor="#f5f5f5"
-    >
-      <Box width={{ xs: '90%', sm: '70%', md: '50%' }}>
-        <Paper elevation={3} sx={{ padding: 4 }}>
-          <Typography variant="h4" align="center" gutterBottom>
-            Welcome to <strong>JuaLearn</strong>
-          </Typography>
-          <Typography variant="subtitle1" align="center" sx={{ mb: 3 }}>
-            Select your role to continue
-          </Typography>
-
-          <Box
-            display="flex"
-            flexDirection={{ xs: 'column', sm: 'row' }}
-            gap={4}
-            justifyContent="center"
-          >
-            {/* Student Login */}
-            <Box flex={1}>
-              <Paper
-                elevation={1}
-                sx={{
-                  textAlign: 'center',
-                  padding: 3,
-                  '&:hover': { boxShadow: 6 },
-                  cursor: 'pointer'
-                }}
-              >
-                <Avatar sx={{ bgcolor: '#1976d2', margin: '0 auto', mb: 1 }}>
-                  <SchoolIcon />
-                </Avatar>
-                <Typography variant="h6">Student</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Access learning materials, assessments, and personalized help.
-                </Typography>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  fullWidth
-                  sx={{ mt: 2 }}
-                  onClick={() => navigate('/login/student')}
-                >
-                  Login as Student
-                </Button>
-              </Paper>
-            </Box>
-
-            {/* Teacher Login */}
-            <Box flex={1}>
-              <Paper
-                elevation={1}
-                sx={{
-                  textAlign: 'center',
-                  padding: 3,
-                  '&:hover': { boxShadow: 6 },
-                  cursor: 'pointer'
-                }}
-              >
-                <Avatar sx={{ bgcolor: '#388e3c', margin: '0 auto', mb: 1 }}>
-                  <PersonIcon />
-                </Avatar>
-                <Typography variant="h6">Teacher</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Manage content, track students, and support learning.
-                </Typography>
-                <Button
-                  variant="contained"
-                  color="success"
-                  fullWidth
-                  sx={{ mt: 2 }}
-                  onClick={() => navigate('/login/teacher')}
-                >
-                  Login as Teacher
-                </Button>
-              </Paper>
-            </Box>
-          </Box>
-
-          <Divider sx={{ mt: 4 }} />
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            display="block"
-            align="center"
-            sx={{ mt: 2 }}
-          >
-            Designed for low-resource environments.
-          </Typography>
-        </Paper>
-      </Box>
-    </Box>
+    <Box className="auth-choice-page"><Box sx={{ width: 'min(100%, 920px)' }}><Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/')} sx={{ mb: 2, color: '#28796b' }}>Back to JuaLearn</Button><Paper className="auth-choice-card"><Box className="auth-choice-head"><Typography variant="overline" fontWeight={800} color="#28796b" letterSpacing=".12em">Welcome to JuaLearn</Typography><h1>Choose your learning space.</h1><p>Continue to the role that matches the way you learn, teach and grow.</p></Box><Box className="auth-role-grid"><Box className="auth-role-option"><Box className="auth-role-icon student"><SchoolIcon /></Box><Typography variant="h6">Student</Typography><Typography>Open courses, practise with assessments and make steady progress at your own pace.</Typography><Button variant="contained" fullWidth onClick={() => navigate('/login/student')} sx={{ bgcolor: '#28796b', '&:hover': { bgcolor: '#206459' } }}>Continue as student</Button></Box><Box className="auth-role-option"><Box className="auth-role-icon teacher"><PersonIcon /></Box><Typography variant="h6">Teacher</Typography><Typography>Create purposeful learning, manage your courses and support every learner.</Typography><Button variant="contained" fullWidth onClick={() => navigate('/login/teacher')} sx={{ bgcolor: '#284d70', '&:hover': { bgcolor: '#1d3b58' } }}>Continue as teacher</Button></Box></Box><Typography variant="caption" color="text.secondary" display="block" textAlign="center" sx={{ mt: 3 }}>Designed for learning that works across devices and classrooms.</Typography></Paper></Box></Box>
   );
 };
 

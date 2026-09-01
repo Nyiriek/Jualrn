@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Paper, Typography, Button, TextField, Link } from '@mui/material';
-import '../styles/Register.css';
+import { Box, Typography, Button, TextField, Link, IconButton, InputAdornment } from '@mui/material';
+import { ArrowBack, AutoStoriesOutlined, Visibility, VisibilityOff } from '@mui/icons-material';
+import '../styles/authPages.css';
 
 const TeacherRegister = () => {
   const navigate = useNavigate();
@@ -16,6 +17,15 @@ const TeacherRegister = () => {
     confirmPassword: '',
   });
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
+  const registrationError = (payload: any) => {
+    if (!payload) return 'Registration failed. Please try again.';
+    if (typeof payload === 'string') return payload;
+    if (payload.detail) return payload.detail;
+    return Object.values(payload).flat().filter(Boolean).join(' ') || 'Registration failed. Please try again.';
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -69,24 +79,23 @@ const TeacherRegister = () => {
 
       if (!response.ok) {
         const err = await response.json();
-        setError(err?.detail || 'Registration failed. Please try again.');
+        setError(registrationError(err));
         return;
       }
 
-      navigate('/login/teacher');
+      navigate(`/verify-email?sent=1&role=teacher&email=${encodeURIComponent(form.email)}`);
     } catch {
       setError('Registration failed. Please try again.');
     }
   };
 
   return (
-    <Box className="register-form-root">
-      <Paper elevation={2} className="register-form-paper">
-        <Typography variant="h5" gutterBottom>
-          Teacher Registration
-        </Typography>
-        <form onSubmit={handleSubmit} className="register-form">
+    <Box className="auth-page"><Box className="auth-shell auth-teacher">
+      <Box className="auth-aside"><div className="auth-brand"><span className="auth-brand-mark"><AutoStoriesOutlined fontSize="small" /></span><span>Jua<span>Learn</span></span></div><div className="auth-aside-copy"><Typography variant="overline" fontWeight={800} letterSpacing=".12em">Build better learning</Typography><h1>Bring your teaching together.</h1><p>Create courses from trusted resources, manage assessments and see how your learners are progressing.</p></div><div className="auth-aside-note"><i />Purposeful tools, designed for teachers.</div></Box>
+      <Box className="auth-form-card"><Button className="auth-back" startIcon={<ArrowBack />} onClick={() => navigate('/login')}>All sign-in options</Button><span className="auth-eyebrow">Create your account</span><h2>Join as a teacher</h2><p>Tell us a little about your teaching context to get started.</p>
+        <form onSubmit={handleSubmit} className="auth-form">
           <TextField
+            id="teacher-register-name"
             label="Full Name"
             variant="outlined"
             fullWidth
@@ -97,6 +106,7 @@ const TeacherRegister = () => {
             onChange={handleChange}
           />
           <TextField
+            id="teacher-register-email"
             label="Email or Username"
             variant="outlined"
             fullWidth
@@ -107,6 +117,7 @@ const TeacherRegister = () => {
             onChange={handleChange}
           />
           <TextField
+            id="teacher-register-institution"
             label="Institution"
             variant="outlined"
             fullWidth
@@ -117,6 +128,7 @@ const TeacherRegister = () => {
             onChange={handleChange}
           />
           <TextField
+            id="teacher-register-experience"
             label="Years of Experience"
             variant="outlined"
             fullWidth
@@ -129,6 +141,7 @@ const TeacherRegister = () => {
             onChange={handleChange}
           />
           <TextField
+            id="teacher-register-phone"
             label="Phone Number"
             variant="outlined"
             fullWidth
@@ -139,32 +152,32 @@ const TeacherRegister = () => {
             onChange={handleChange}
           />
           <TextField
+            id="teacher-register-password"
             label="Password"
             variant="outlined"
-            type="password"
+            type={showPassword ? "text" : "password"}
             fullWidth
             margin="normal"
             name="password"
             required
             value={form.password}
             onChange={handleChange}
+            slotProps={{ input: { endAdornment: <InputAdornment position="end"><IconButton aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((shown) => !shown)} edge="end">{showPassword ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment> } }}
           />
           <TextField
+            id="teacher-register-password-confirmation"
             label="Confirm Password"
             variant="outlined"
-            type="password"
+            type={showConfirmation ? "text" : "password"}
             fullWidth
             margin="normal"
             name="confirmPassword"
             required
             value={form.confirmPassword}
             onChange={handleChange}
+            slotProps={{ input: { endAdornment: <InputAdornment position="end"><IconButton aria-label={showConfirmation ? "Hide confirmation password" : "Show confirmation password"} onClick={() => setShowConfirmation((shown) => !shown)} edge="end">{showConfirmation ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment> } }}
           />
-          {error && (
-            <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-              {error}
-            </Typography>
-          )}
+          {error && <Typography className="auth-error" color="error" variant="body2">{error}</Typography>}
           <Button
             type="submit"
             variant="contained"
@@ -174,12 +187,10 @@ const TeacherRegister = () => {
           >
             Register
           </Button>
-          <Box mt={2} textAlign="center">
-            <Link href="/login/teacher">Already have an account? Login</Link>
-          </Box>
+          <p className="auth-switch">Already have an account? <Link href="/login/teacher">Teacher sign in</Link></p>
         </form>
-      </Paper>
-    </Box>
+      </Box>
+    </Box></Box>
   );
 };
 

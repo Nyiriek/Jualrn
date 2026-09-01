@@ -62,9 +62,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
 
   const handleSave = async () => {
     setSaving(true);
-    await onSave(editUser);
-    setSaving(false);
-    onClose();
+    try {
+      await onSave(editUser);
+      onClose();
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -77,7 +80,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
             sx={{ width: 80, height: 80, mb: 2, cursor: 'pointer' }}
             onClick={() => fileInputRef.current?.click()}
           />
+          <Button size="small" onClick={() => fileInputRef.current?.click()}>Change profile picture</Button>
           <input
+            id="profile-picture"
+            name="profile_picture"
             ref={fileInputRef}
             type="file"
             accept="image/*"
@@ -86,6 +92,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
           />
         </Box>
         <TextField
+          id="profile-username"
           margin="dense"
           label="Username"
           name="username"
@@ -94,6 +101,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
           fullWidth
         />
         <TextField
+          id="profile-email"
           margin="dense"
           label="Email"
           name="email"
@@ -102,6 +110,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
           fullWidth
         />
         <TextField
+          id="profile-first-name"
           margin="dense"
           label="First Name"
           name="firstName"
@@ -110,6 +119,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
           fullWidth
         />
         <TextField
+          id="profile-last-name"
           margin="dense"
           label="Last Name"
           name="lastName"
@@ -118,6 +128,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
           fullWidth
         />
         <TextField
+          id="profile-role"
+          name="role"
           margin="dense"
           label="Role"
           value={user.role}

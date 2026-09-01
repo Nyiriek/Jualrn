@@ -3,39 +3,57 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
+from django.db import transaction
 from django.db.models import Q
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.decorators import action, api_view, permission_classes
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import Assignment, Subject, User, Notification, Quiz, Enrollment, QuizResult, Lesson, QuizQuestion, QuizChoice
+from .models import Assignment, Subject, User, Notification, Quiz, Enrollment, QuizResult, Lesson, QuizQuestion, QuizChoice, LearningResource, ForumPost, ForumComment, FeedbackPost, FeedbackComment, EmailVerificationToken
 from .serializers import (
     AssignmentSerializer, SubjectSerializer, MyTokenObtainPairSerializer,
     UserSerializer, UserProfileSerializer, UserRegisterSerializer, StudentSerializer, TeacherRegisterSerializer,
-    NotificationSerializer, QuizSerializer, EnrollmentSerializer, QuizResultSerializer, LessonSerializer, QuizQuestionSerializer, QuizChoiceSerializer)
+    NotificationSerializer, QuizSerializer, EnrollmentSerializer, QuizResultSerializer, TeacherQuizResultSerializer, LessonSerializer, QuizQuestionSerializer, QuizChoiceSerializer, LearningResourceSerializer, ForumPostSerializer, ForumCommentSerializer, FeedbackPostSerializer, FeedbackCommentSerializer)
 from rest_framework import generics
 from .permissions import IsAdminTeacherOrReadOnlyForStudent
 from .utils import grade_quiz 
+from .quiz_generation import build_question_drafts
+from .assignment_generation import build_assignment_draft
 from django.shortcuts import get_object_or_404
 from django.conf import settings
+from django.utils import timezone
+from datetime import date, timedelta
 import json
 import os
+import secrets
+from .email_verification import VerificationEmailDeliveryError, create_and_send_verification
 
 
 User = get_user_model()
 
 class TeacherRegisterView(generics.CreateAPIView):
     serializer_class = TeacherRegisterSerializer
-    permission_classes = [IsAdminTeacherOrReadOnlyForStudent]
+    permission_classes = [AllowAny]
     
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
             print("Teacher registration validation errors:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        self.perform_create(serializer)
+        try:
+            with transaction.atomic():
+                self.perform_create(serializer)
+        except VerificationEmailDeliveryError:
+            return Response(
+                {'detail': 'We could not send your verification code. Please try again shortly.'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def perform_create(self, serializer):
+        user = serializer.save()
+        create_and_send_verification(user)
 
 # --------- STUDENT LIST VIEW ---------
 class StudentListViewSet(viewsets.ReadOnlyModelViewSet):
@@ -44,6 +62,90 @@ class StudentListViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         return User.objects.filter(role='student')
+
+
+class ForumPostViewSet(viewsets.ModelViewSet):
+    serializer_class = ForumPostSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return ForumPost.objects.select_related('author').prefetch_related('comments__author')
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def perform_update(self, serializer):
+        if serializer.instance.author != self.request.user:
+            raise PermissionDenied('You can only edit your own forum posts.')
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if instance.author != self.request.user:
+            raise PermissionDenied('You can only delete your own forum posts.')
+        instance.delete()
+
+
+class ForumCommentViewSet(viewsets.ModelViewSet):
+    serializer_class = ForumCommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return ForumComment.objects.select_related('author', 'post')
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def perform_update(self, serializer):
+        if serializer.instance.author != self.request.user:
+            raise PermissionDenied('You can only edit your own forum comments.')
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if instance.author != self.request.user:
+            raise PermissionDenied('You can only delete your own forum comments.')
+        instance.delete()
+
+
+class FeedbackPostViewSet(viewsets.ModelViewSet):
+    serializer_class = FeedbackPostSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return FeedbackPost.objects.select_related('author').prefetch_related('comments__author')
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def perform_update(self, serializer):
+        if serializer.instance.author != self.request.user:
+            raise PermissionDenied('You can only edit your own feedback posts.')
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if instance.author != self.request.user:
+            raise PermissionDenied('You can only delete your own feedback posts.')
+        instance.delete()
+
+
+class FeedbackCommentViewSet(viewsets.ModelViewSet):
+    serializer_class = FeedbackCommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return FeedbackComment.objects.select_related('author', 'post')
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def perform_update(self, serializer):
+        if serializer.instance.author != self.request.user:
+            raise PermissionDenied('You can only edit your own feedback replies.')
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if instance.author != self.request.user:
+            raise PermissionDenied('You can only delete your own feedback replies.')
+        instance.delete()
 
 # --------- ASSIGNMENT ---------
 class AssignmentViewSet(viewsets.ModelViewSet):
@@ -56,7 +158,7 @@ class AssignmentViewSet(viewsets.ModelViewSet):
         if user.role == 'student':
             return Assignment.objects.filter(assigned_to=user, published=True)
         elif user.role == 'teacher':
-            return Assignment.objects.filter(created_by=user)
+            return Assignment.objects.filter(created_by=user, assigned_to__isnull=True)
         elif user.role == 'admin':
             return Assignment.objects.all()
         return Assignment.objects.none()
@@ -69,10 +171,13 @@ class AssignmentViewSet(viewsets.ModelViewSet):
         title = validated_data['title']
         subject = validated_data['subject']
         due_date = validated_data['due_date']
+        description = validated_data.get('description', '')
+        assigned_to = validated_data.get('assigned_to')
 
         # Create base assignment
         base_assignment = Assignment.objects.create(
             title=title,
+            description=description,
             subject=subject,
             due_date=due_date,
             created_by=self.request.user,
@@ -82,10 +187,11 @@ class AssignmentViewSet(viewsets.ModelViewSet):
         )
 
         # Bulk create for enrolled students
-        enrolled_students = Enrollment.objects.filter(subject=subject).values_list('student', flat=True)
+        enrolled_students = [assigned_to.id] if assigned_to else Enrollment.objects.filter(subject=subject).values_list('student', flat=True)
         assignments = [
             Assignment(
                 title=base_assignment.title,
+                description=base_assignment.description,
                 subject=base_assignment.subject,
                 created_by=base_assignment.created_by,
                 due_date=base_assignment.due_date,
@@ -103,23 +209,25 @@ class AssignmentViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         assignment = serializer.save()
-        Notification.objects.create(
-            recipient=assignment.assigned_to,
-            title=f"Assignment Updated: {assignment.title}",
-            message=f"Your assignment in {assignment.subject.name} was updated.",
-            url=f"/student/assignments/{assignment.id}/",
-            type="assignment_update"
+        Assignment.objects.filter(created_by=assignment.created_by, title=assignment.title, subject=assignment.subject).exclude(id=assignment.id).update(
+            title=assignment.title, description=assignment.description, due_date=assignment.due_date, published=assignment.published
         )
 
     def perform_destroy(self, instance):
-        Notification.objects.create(
-            recipient=instance.assigned_to,
-            title=f"Assignment Deleted: {instance.title}",
-            message=f"Your assignment in {instance.subject.name} was deleted.",
-            url="",
-            type="assignment_delete"
-        )
+        if instance.assigned_to:
+            Notification.objects.create(recipient=instance.assigned_to, title=f"Assignment Deleted: {instance.title}", message=f"Your assignment in {instance.subject.name} was deleted.", url="", type="assignment_delete")
         instance.delete()
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def generate_from_course(self, request):
+        if request.user.role != 'teacher':
+            raise PermissionDenied('Only teachers can generate assignments from course material.')
+        subject_id = request.data.get('subject_id')
+        subject = get_object_or_404(Subject, id=subject_id, created_by=request.user)
+        resources = list(subject.resources.all())
+        lessons = list(Lesson.objects.filter(subject=subject).order_by('date_created'))
+        draft = build_assignment_draft(subject, resources, lessons)
+        return Response(draft)
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def publish(self, request, pk=None):
@@ -129,6 +237,7 @@ class AssignmentViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Not authorized to publish this assignment.'}, status=403)
         assignment.published = True
         assignment.save()
+        Assignment.objects.filter(created_by=assignment.created_by, title=assignment.title, subject=assignment.subject).exclude(id=assignment.id).update(published=True)
 
         enrolled_students = Enrollment.objects.filter(subject=assignment.subject).values_list('student', flat=True)
         notifications = [
@@ -143,6 +252,41 @@ class AssignmentViewSet(viewsets.ModelViewSet):
         ]
         Notification.objects.bulk_create(notifications)
         return Response({'detail': 'Assignment published and students notified.'})
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def student_work(self, request):
+        if request.user.role not in ['teacher', 'admin']:
+            raise PermissionDenied("Only teachers can view student work.")
+        queryset = Assignment.objects.filter(created_by=request.user, assigned_to__isnull=False) if request.user.role == 'teacher' else Assignment.objects.filter(assigned_to__isnull=False)
+        return Response(self.get_serializer(queryset, many=True).data)
+
+    @action(detail=True, methods=['patch'], url_path='grade-submission', permission_classes=[IsAuthenticated])
+    def grade_submission(self, request, pk=None):
+        if request.user.role not in ['teacher', 'admin']:
+            raise PermissionDenied('Only teachers and administrators can grade submissions.')
+        filters = {'id': pk, 'assigned_to__isnull': False}
+        if request.user.role == 'teacher':
+            filters['created_by'] = request.user
+        assignment = get_object_or_404(Assignment, **filters)
+        if not assignment.submitted_at:
+            return Response({'detail': 'This assignment has not been submitted yet.'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            grade = int(request.data.get('grade'))
+        except (TypeError, ValueError):
+            return Response({'grade': 'Enter a whole-number grade from 0 to 100.'}, status=status.HTTP_400_BAD_REQUEST)
+        if grade < 0 or grade > 100:
+            return Response({'grade': 'Enter a whole-number grade from 0 to 100.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        assignment.grade = grade
+        assignment.save(update_fields=['grade'])
+        Notification.objects.create(
+            recipient=assignment.assigned_to,
+            title=f'Assignment Graded: {assignment.title}',
+            message=f'Your teacher graded your assignment. Your final grade is {grade}%.',
+            url='/student/grades',
+            type='assignment_graded',
+        )
+        return Response(self.get_serializer(assignment).data)
 
         
 # --------- SUBJECT ---------
@@ -186,15 +330,17 @@ class SubjectViewSet(viewsets.ModelViewSet):
         if user.role != 'teacher' or subject.created_by != user:
             return Response({'detail': 'Not authorized to publish this subject.'}, status=403)
 
+        was_published = subject.published
         subject.published = True
         subject.save()
+        teacher_name = f"{user.first_name} {user.last_name}".strip() or user.username
 
         students = User.objects.filter(role='student')
         notifications = [
             Notification(
                 recipient=student,
                 title=f"Course Published: {subject.name}",
-                message=f"The course '{subject.name}' is now published and open for enrollment.",
+                message=f"{teacher_name} published '{subject.name}'. The course is now open for enrollment.",
                 url=f"/student/subject/{subject.id}",
                 type="subject_published"
             )
@@ -202,7 +348,89 @@ class SubjectViewSet(viewsets.ModelViewSet):
         ]
         Notification.objects.bulk_create(notifications)
 
+        if not was_published:
+            admin_notifications = [
+                Notification(
+                    recipient=admin,
+                    title=f"Teacher Course Published: {subject.name}",
+                    message=f"{teacher_name} published the course '{subject.name}'. Review its content, lessons, quizzes, and assignments.",
+                    url="/admin",
+                    type="teacher_course_published",
+                )
+                for admin in User.objects.filter(role='admin')
+            ]
+            Notification.objects.bulk_create(admin_notifications)
+
         return Response({'detail': 'Subject published and students notified.'})
+
+
+class PublicCourseListView(APIView):
+    """A read-only catalogue for landing-page visitors.
+
+    Only published courses are shown. Assessments, enrolments and user details
+    deliberately remain behind authenticated role-specific endpoints.
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        courses = Subject.objects.filter(published=True).select_related('created_by').prefetch_related('resources')
+        return Response(SubjectSerializer(courses, many=True, context={'request': request}).data)
+
+
+class PublicCourseDetailView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, pk):
+        course = get_object_or_404(
+            Subject.objects.filter(published=True).select_related('created_by').prefetch_related('resources'),
+            pk=pk,
+        )
+        data = SubjectSerializer(course, context={'request': request}).data
+        data['lessons'] = LessonSerializer(
+            Lesson.objects.filter(subject=course).order_by('date_created'), many=True, context={'request': request}
+        ).data
+        return Response(data)
+
+
+class LearningResourceViewSet(viewsets.ModelViewSet):
+    serializer_class = LearningResourceSerializer
+    permission_classes = [IsAdminTeacherOrReadOnlyForStudent]
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = LearningResource.objects.all()
+        if user.role == 'teacher':
+            queryset = queryset.filter(Q(is_published=True) | Q(created_by=user))
+        elif user.role == 'student':
+            queryset = queryset.filter(is_published=True)
+
+        search = self.request.query_params.get('search', '').strip()
+        if search:
+            queryset = queryset.filter(Q(title__icontains=search) | Q(description__icontains=search) | Q(subject_area__icontains=search))
+        resource_type = self.request.query_params.get('type', '').strip()
+        if resource_type:
+            queryset = queryset.filter(resource_type=resource_type)
+        subject_area = self.request.query_params.get('subject', '').strip()
+        if subject_area:
+            queryset = queryset.filter(subject_area__iexact=subject_area)
+        topic = self.request.query_params.get('topic', '').strip()
+        if topic:
+            queryset = queryset.filter(topic__iexact=topic)
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+    def perform_update(self, serializer):
+        resource = self.get_object()
+        if self.request.user.role == 'teacher' and resource.created_by != self.request.user:
+            raise PermissionDenied('You can only edit resources you added.')
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if self.request.user.role == 'teacher' and instance.created_by != self.request.user:
+            raise PermissionDenied('You can only delete resources you added.')
+        instance.delete()
 
 # --------- QUIZ ---------
 
@@ -265,6 +493,40 @@ class QuizViewSet(viewsets.ModelViewSet):
         instance.delete()
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def generate_from_course(self, request, pk=None):
+        quiz = self.get_object()
+        if request.user.role != 'teacher' or quiz.created_by != request.user:
+            raise PermissionDenied('Only the course teacher can generate quiz questions.')
+
+        try:
+            limit = max(1, min(int(request.data.get('limit', 6)), 12))
+        except (TypeError, ValueError):
+            limit = 6
+
+        resources = quiz.resources.all()
+        if not resources.exists():
+            resources = quiz.subject.resources.all()
+        drafts = build_question_drafts(quiz.subject, resources, Lesson.objects.filter(subject=quiz.subject), limit=limit)
+        if not drafts:
+            return Response({'detail': 'Add course content, linked resources, or lessons before generating questions.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        created = []
+        for draft in drafts:
+            question = QuizQuestion.objects.create(
+                quiz=quiz,
+                text=draft['text'],
+                type=draft['type'],
+                answer_key=draft.get('answer_key', ''),
+            )
+            for index, choice_text in enumerate(draft['choices']):
+                QuizChoice.objects.create(question=question, text=choice_text, is_correct=index == draft['correct_index'])
+            created.append(question)
+        return Response({
+            'detail': f'{len(created)} questions generated from the course material. Review them before publishing.',
+            'questions': QuizQuestionSerializer(created, many=True).data,
+        }, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def publish(self, request, pk=None):
         quiz = self.get_object()
         user = request.user
@@ -287,11 +549,18 @@ class QuizViewSet(viewsets.ModelViewSet):
         Notification.objects.bulk_create(notifications)
         return Response({'detail': 'Quiz published and students notified.'})
 
-    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['get', 'post'], permission_classes=[IsAuthenticated])
     def questions(self, request, pk=None):
         quiz = self.get_object()
+        if request.method == 'POST':
+            if request.user.role != 'teacher' or quiz.created_by != request.user:
+                raise PermissionDenied('Only the course teacher can add quiz questions.')
+            serializer = QuizQuestionSerializer(data=request.data, context={'request': request})
+            serializer.is_valid(raise_exception=True)
+            serializer.save(quiz=quiz)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         questions = quiz.questions.all()
-        serializer = QuizQuestionSerializer(questions, many=True)
+        serializer = QuizQuestionSerializer(questions, many=True, context={'request': request})
         return Response(serializer.data)
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
@@ -301,27 +570,42 @@ class QuizViewSet(viewsets.ModelViewSet):
         if student.role != 'student':
             raise PermissionDenied("Only students can submit quizzes.")
         answers = request.data.get('answers', [])
+        if not quiz.questions.exists():
+            return Response({'detail': 'This quiz has no questions yet.'}, status=status.HTTP_400_BAD_REQUEST)
         quiz_result = grade_quiz(student, quiz, answers)
 
-        # Notify teacher about submission to grade
+        pending_review_count = getattr(quiz_result, 'pending_review_count', 0)
+
+        # Notify teacher about submission to grade or review.
         Notification.objects.create(
             recipient=quiz.created_by,
-            title=f"Quiz Submitted: {quiz.title}",
-            message=f"{student.username} submitted the quiz '{quiz.title}'. Please grade it.",
+            title=f"Quiz {'Review Needed' if pending_review_count else 'Auto-graded'}: {quiz.title}",
+            message=(
+                f"{student.username} submitted '{quiz.title}'. {pending_review_count} written response(s) need review."
+                if pending_review_count else f"{student.username} submitted '{quiz.title}' and it was graded automatically."
+            ),
             url=f"/teacher/quizzes/{quiz.id}/results",
             type="quiz_submitted",
         )
 
-        # Notify student of their graded quiz
+        # Notify the student of their automatic score.
         Notification.objects.create(
             recipient=student,
-            title=f"Quiz Graded: {quiz.title}",
-            message=f"Your quiz in {quiz.subject.name} has been graded. Your score: {quiz_result.grade}%",
+            title=f"Quiz {'Score' if not pending_review_count else 'Auto-score'}: {quiz.title}",
+            message=(
+                f"Your automatic score in {quiz.subject.name}: {quiz_result.grade}%. {pending_review_count} response(s) still need teacher review."
+                if pending_review_count else f"Your quiz in {quiz.subject.name} was graded automatically. Your score: {quiz_result.grade}%"
+            ),
             url=f"/student/quizzes/{quiz.id}/results",
             type="quiz_graded",
         )
 
-        return Response({'grade': quiz_result.grade}, status=status.HTTP_200_OK)
+        return Response({
+            'grade': quiz_result.grade,
+            'auto_graded': True,
+            'pending_review_count': pending_review_count,
+            'answer_results': getattr(quiz_result, 'answer_results', []),
+        }, status=status.HTTP_200_OK)
 
 
 # --------- NOTIFICATIONS ---------
@@ -371,8 +655,61 @@ class RegisterStudentView(generics.CreateAPIView):
     serializer_class = UserRegisterSerializer
     permission_classes = [AllowAny]
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            with transaction.atomic():
+                self.perform_create(serializer)
+        except VerificationEmailDeliveryError:
+            return Response(
+                {'detail': 'We could not send your verification code. Please try again shortly.'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     def perform_create(self, serializer):
-        serializer.save(role='student')
+        user = serializer.save(role='student')
+        create_and_send_verification(user)
+
+
+class VerifyEmailView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = str(request.data.get('email', '')).strip()
+        code = str(request.data.get('code', '')).strip()
+        record = EmailVerificationToken.objects.select_related('user').filter(user__email__iexact=email, used_at__isnull=True).first()
+        if not record or record.expires_at <= timezone.now():
+            return Response({'detail': 'This verification code is invalid or has expired. Request a new code to continue.'}, status=status.HTTP_400_BAD_REQUEST)
+        if record.attempts >= 5:
+            record.used_at = timezone.now()
+            record.save(update_fields=['used_at'])
+            return Response({'detail': 'Too many incorrect attempts. Request a new verification code.'}, status=status.HTTP_400_BAD_REQUEST)
+        if len(code) != 4 or not code.isdigit() or not secrets.compare_digest(record.token, code):
+            record.attempts += 1
+            record.save(update_fields=['attempts'])
+            return Response({'detail': 'The verification code is incorrect. Please try again.'}, status=status.HTTP_400_BAD_REQUEST)
+        record.user.email_verified = True
+        record.user.save(update_fields=['email_verified'])
+        record.used_at = timezone.now()
+        record.save(update_fields=['used_at'])
+        return Response({'detail': 'Your email has been verified. You can now sign in.'})
+
+
+class ResendVerificationView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = str(request.data.get('email', '')).strip()
+        user = User.objects.filter(email__iexact=email, role__in=['student', 'teacher'], email_verified=False).first()
+        if user:
+            try:
+                create_and_send_verification(user)
+            except VerificationEmailDeliveryError:
+                return Response({'detail': 'We could not send the verification email right now. Please try again later.'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        # Keep this response neutral so addresses cannot be used to discover accounts.
+        return Response({'detail': 'If an unverified account uses this email, a new verification code has been sent.'})
 
 # --------- USER MANAGEMENT ---------
 class UserViewSet(viewsets.ModelViewSet):
@@ -465,7 +802,9 @@ class QuizResultViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if user.role == 'student':
             return QuizResult.objects.filter(student=user)
-        elif user.role in ['teacher', 'admin']:
+        elif user.role == 'teacher':
+            return QuizResult.objects.filter(quiz__created_by=user)
+        elif user.role == 'admin':
             return QuizResult.objects.all()
         return QuizResult.objects.none()
 
@@ -477,6 +816,39 @@ class QuizResultViewSet(viewsets.ModelViewSet):
             serializer.save()
         else:
             raise PermissionDenied("Not authorized.")
+
+    @action(detail=False, methods=['get'], url_path='gradebook')
+    def gradebook(self, request):
+        if request.user.role not in ['teacher', 'admin']:
+            raise PermissionDenied('Only teachers and administrators can view the gradebook.')
+        results = self.get_queryset().filter(grade__isnull=False).select_related(
+            'student', 'quiz__subject'
+        ).order_by('-submitted_at')
+        return Response(TeacherQuizResultSerializer(results, many=True, context={'request': request}).data)
+
+    @action(detail=True, methods=['patch'], url_path='override-grade')
+    def override_grade(self, request, pk=None):
+        result = self.get_object()
+        if request.user.role == 'teacher' and result.quiz.created_by != request.user:
+            raise PermissionDenied('You can only adjust results for quizzes you created.')
+        try:
+            grade = int(request.data.get('grade'))
+        except (TypeError, ValueError):
+            return Response({'grade': 'Enter a whole-number grade from 0 to 100.'}, status=status.HTTP_400_BAD_REQUEST)
+        if grade < 0 or grade > 100:
+            return Response({'grade': 'Enter a whole-number grade from 0 to 100.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        result.grade = grade
+        result.is_teacher_adjusted = True
+        result.save(update_fields=['grade', 'is_teacher_adjusted'])
+        Notification.objects.create(
+            recipient=result.student,
+            title=f'Quiz Grade Updated: {result.quiz.title}',
+            message=f'Your teacher updated your quiz grade to {grade}%.',
+            url='/student/quizzes/',
+            type='quiz_grade_updated',
+        )
+        return Response(TeacherQuizResultSerializer(result, context={'request': request}).data)
         
 
 # --------- STUDENT ASSIGNMENT AND QUIZ GRADES ---------
@@ -509,6 +881,8 @@ class SubmitQuizView(APIView):
         answers = request.data.get('answers', [])
 
         quiz_result = grade_quiz(student, quiz, answers)
+        pending_review_count = getattr(quiz_result, 'pending_review_count', 0)
+        pending_review_count = getattr(quiz_result, 'pending_review_count', 0)
 
         serializer = QuizResultSerializer(quiz_result)
         return Response(serializer.data)
@@ -565,10 +939,21 @@ class EnrolledStudentsList(generics.ListAPIView):
 class LessonViewSet(viewsets.ModelViewSet):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAdminTeacherOrReadOnlyForStudent]
 
     def perform_create(self, serializer):
+        if self.request.user.role not in ['teacher', 'admin']:
+            raise PermissionDenied("Only teachers can create lessons.")
+        subject = serializer.validated_data['subject']
+        if self.request.user.role == 'teacher' and subject.created_by != self.request.user:
+            raise PermissionDenied("You can only add lessons to courses you created.")
         serializer.save(created_by=self.request.user)
+
+    def perform_update(self, serializer):
+        subject = serializer.validated_data.get('subject', serializer.instance.subject)
+        if self.request.user.role == 'teacher' and subject.created_by != self.request.user:
+            raise PermissionDenied("You can only move lessons to courses you created.")
+        serializer.save()
 
     def get_queryset(self):
         user = self.request.user
@@ -584,82 +969,150 @@ class LessonViewSet(viewsets.ModelViewSet):
 
 # --------- BULK UPLOAD ENDPOINT ---------
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAuthenticated])
 def bulk_upload(request):
-    base_path = getattr(settings, 'CONTENT_FOLDER', None)
-    if base_path is None:
-        return Response({"detail": "Content folder path not configured."}, status=400)
+    """Import a course package uploaded by an administrator.
+
+    A package is a JSON file containing a ``courses`` array.  Each course can
+    include its overview, resources, lessons, quizzes/questions and
+    assignments.  Re-uploading a course with the same name updates that course
+    and its matching learning items, so an administrator can correct content
+    without creating duplicates.
+    """
+    if request.user.role != 'admin':
+        raise PermissionDenied('Only administrators can upload course packages.')
+
+    upload = request.FILES.get('file')
+    if upload is None:
+        return Response({'detail': 'Choose a JSON course package to upload.'}, status=status.HTTP_400_BAD_REQUEST)
+    if upload.size > 5 * 1024 * 1024:
+        return Response({'detail': 'The upload must be 5 MB or smaller.'}, status=status.HTTP_400_BAD_REQUEST)
+    if not upload.name.lower().endswith('.json'):
+        return Response({'detail': 'Upload a .json course package.'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        with open(os.path.join(base_path, 'subjects.json'), 'r') as f:
-            subjects_data = json.load(f)
-        with open(os.path.join(base_path, 'lessons.json'), 'r') as f:
-            lessons_data = json.load(f)
-        with open(os.path.join(base_path, 'quizzes.json'), 'r') as f:
-            quizzes_data = json.load(f)
+        package = json.loads(upload.read().decode('utf-8-sig'))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return Response({'detail': 'The selected file is not valid UTF-8 JSON.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        from .models import Subject, Lesson, Quiz, QuizQuestion, QuizChoice
+    courses = package.get('courses') if isinstance(package, dict) else None
+    if not isinstance(courses, list) or not courses:
+        return Response({'detail': 'The JSON package must contain a non-empty "courses" list.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        created_subjects = {}
+    def package_date(value):
+        if not value:
+            return date.today() + timedelta(days=30)
+        try:
+            return date.fromisoformat(str(value))
+        except ValueError as exc:
+            raise ValueError('Use due dates in YYYY-MM-DD format.') from exc
 
-        # Create Subjects
-        for subj in subjects_data:
-            subject_obj, _ = Subject.objects.get_or_create(
-                name=subj['name'],
-                defaults={
-                    'description': subj.get('description', ''),
-                    'created_by': request.user
-                }
-            )
-            created_subjects[subj['name']] = subject_obj
-
-        # Create Lessons
-        for lesson in lessons_data:
-            subj_obj = created_subjects.get(lesson['subjectName'])
-            if subj_obj:
-                Lesson.objects.get_or_create(
-                    subject=subj_obj,
-                    title=lesson['title'],
+    counts = {'courses': 0, 'resources': 0, 'lessons': 0, 'quizzes': 0, 'questions': 0, 'assignments': 0}
+    try:
+        with transaction.atomic():
+            for course_data in courses:
+                if not isinstance(course_data, dict) or not str(course_data.get('name', '')).strip():
+                    raise ValueError('Every course needs a name.')
+                name = str(course_data['name']).strip()
+                subject, _ = Subject.objects.update_or_create(
+                    name=name,
                     defaults={
-                        'content': lesson['content'],
-                        'created_by': request.user
-                    }
+                        'description': str(course_data.get('description', '')),
+                        'content': str(course_data.get('content', '')),
+                        'published': bool(course_data.get('published', False)),
+                        'created_by': request.user,
+                    },
                 )
+                counts['courses'] += 1
 
-        # Create Quizzes and their Questions + Choices
-        for quiz in quizzes_data:
-            subj_obj = created_subjects.get(quiz['subjectName'])
-            if not subj_obj:
-                continue
-
-            quiz_obj, _ = Quiz.objects.get_or_create(
-                title=quiz['title'],
-                subject=subj_obj,
-                defaults={
-                    'description': quiz.get('description', ''),
-                    'due_date': quiz.get('due_date'),
-                    'created_by': request.user,
-                }
-            )
-            quiz_obj.questions.all().delete()
-
-            for q in quiz.get('questions', []):
-                question_obj = QuizQuestion.objects.create(
-                    quiz=quiz_obj,
-                    text=q['text'],
-                    type=q.get('type', 'multiple-choice'),
-                )
-                for choice in q.get('choices', []):
-                    QuizChoice.objects.create(
-                        question=question_obj,
-                        text=choice['text'],
-                        is_correct=choice.get('is_correct', False),
+                for resource_data in course_data.get('resources', []):
+                    title = str(resource_data.get('title', '')).strip()
+                    if not title:
+                        raise ValueError(f'Resource titles are required in {name}.')
+                    resource, _ = LearningResource.objects.update_or_create(
+                        title=title,
+                        subject_area=str(resource_data.get('subject_area', name)),
+                        topic=str(resource_data.get('topic', '')),
+                        defaults={
+                            'resource_type': resource_data.get('resource_type', 'reading'),
+                            'description': str(resource_data.get('description', '')),
+                            'content': str(resource_data.get('content', '')),
+                            'source': str(resource_data.get('source', '')),
+                            'source_reference': str(resource_data.get('source_reference', '')),
+                            'source_url': str(resource_data.get('source_url', '')),
+                            'is_published': bool(resource_data.get('is_published', True)),
+                            'created_by': request.user,
+                        },
                     )
+                    subject.resources.add(resource)
+                    counts['resources'] += 1
 
-        return Response({"detail": "Bulk upload successful."}, status=status.HTTP_201_CREATED)
+                for lesson_data in course_data.get('lessons', []):
+                    title = str(lesson_data.get('title', '')).strip()
+                    if not title:
+                        raise ValueError(f'Lesson titles are required in {name}.')
+                    Lesson.objects.update_or_create(
+                        subject=subject,
+                        title=title,
+                        defaults={'content': str(lesson_data.get('content', '')), 'created_by': request.user},
+                    )
+                    counts['lessons'] += 1
 
-    except Exception as e:
-        return Response({"detail": f"Bulk upload failed: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+                for quiz_data in course_data.get('quizzes', []):
+                    title = str(quiz_data.get('title', '')).strip()
+                    if not title:
+                        raise ValueError(f'Quiz titles are required in {name}.')
+                    quiz, _ = Quiz.objects.update_or_create(
+                        subject=subject,
+                        title=title,
+                        defaults={
+                            'description': str(quiz_data.get('description', '')),
+                            'due_date': package_date(quiz_data.get('due_date')),
+                            'published': bool(quiz_data.get('published', False)),
+                            'created_by': request.user,
+                            'assigned_to': None,
+                        },
+                    )
+                    if 'questions' in quiz_data:
+                        quiz.questions.all().delete()
+                        for question_data in quiz_data.get('questions') or []:
+                            text = str(question_data.get('text', '')).strip()
+                            if not text:
+                                raise ValueError(f'Quiz questions need text in {title}.')
+                            question = QuizQuestion.objects.create(
+                                quiz=quiz,
+                                text=text,
+                                type=question_data.get('type', 'multiple-choice'),
+                                answer_key=str(question_data.get('answer_key', '')),
+                            )
+                            for choice_data in question_data.get('choices', []):
+                                choice_text = str(choice_data.get('text', '')).strip()
+                                if choice_text:
+                                    QuizChoice.objects.create(question=question, text=choice_text, is_correct=bool(choice_data.get('is_correct', False)))
+                            counts['questions'] += 1
+                    counts['quizzes'] += 1
+
+                for assignment_data in course_data.get('assignments', []):
+                    title = str(assignment_data.get('title', '')).strip()
+                    if not title:
+                        raise ValueError(f'Assignment titles are required in {name}.')
+                    Assignment.objects.update_or_create(
+                        subject=subject,
+                        title=title,
+                        assigned_to=None,
+                        defaults={
+                            'description': str(assignment_data.get('description', '')),
+                            'due_date': package_date(assignment_data.get('due_date')),
+                            'published': bool(assignment_data.get('published', False)),
+                            'created_by': request.user,
+                        },
+                    )
+                    counts['assignments'] += 1
+    except (TypeError, ValueError) as exc:
+        return Response({'detail': f'Upload could not be imported: {exc}'}, status=status.HTTP_400_BAD_REQUEST)
+
+    summary = ', '.join(f'{value} {key}' for key, value in counts.items() if value)
+    return Response({'detail': f'Course package imported: {summary}.', 'counts': counts}, status=status.HTTP_201_CREATED)
 
 
 # --------- ASSIGNMENT SUBMISSION ---------
@@ -670,7 +1123,9 @@ class SubmitAssignmentView(APIView):
         student = request.user
         assignment = get_object_or_404(Assignment, id=assignment_id, assigned_to=student)
 
-        # Save submission info here if you want
+        assignment.submission_text = request.data.get('submission_text', '')
+        assignment.submitted_at = timezone.now()
+        assignment.save(update_fields=['submission_text', 'submitted_at'])
 
         Notification.objects.create(
             recipient=assignment.created_by,
@@ -679,7 +1134,7 @@ class SubmitAssignmentView(APIView):
             url=f"/teacher/assignments/{assignment.id}/grade",
             type="assignment_submitted"
         )
-        return Response({"detail": "Assignment submitted successfully."}, status=status.HTTP_200_OK)
+        return Response({"detail": "Assignment submitted successfully.", "submitted_at": assignment.submitted_at}, status=status.HTTP_200_OK)
     
     
 # --------- SUBMIT QUIZ VIEW ---------
@@ -692,6 +1147,7 @@ class SubmitQuizView(APIView):
         answers = request.data.get('answers', [])
         from .utils import grade_quiz
         quiz_result = grade_quiz(student, quiz, answers)
+        pending_review_count = getattr(quiz_result, 'pending_review_count', 0)
 
         Notification.objects.create(
             recipient=quiz.created_by,
@@ -700,21 +1156,34 @@ class SubmitQuizView(APIView):
             url=f"/teacher/quizzes/{quiz.id}/grade",
             type="quiz_submitted"
         )
-        return Response({'grade': quiz_result.grade}, status=status.HTTP_200_OK)
+        return Response({
+            'grade': quiz_result.grade,
+            'auto_graded': True,
+            'pending_review_count': pending_review_count,
+            'answer_results': getattr(quiz_result, 'answer_results', []),
+        }, status=status.HTTP_200_OK)
     
     
 # --- QuizQuestion Viewset for managing questions within a quiz ---
 class QuizQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = QuizQuestionSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminTeacherOrReadOnlyForStudent]
 
     def get_queryset(self):
         quiz_id = self.kwargs.get('quiz_pk')
+        quiz = get_object_or_404(Quiz, id=quiz_id)
+        user = self.request.user
+        if user.role == 'teacher' and quiz.created_by != user:
+            return QuizQuestion.objects.none()
+        if user.role == 'student' and (not quiz.published or not Enrollment.objects.filter(student=user, subject=quiz.subject).exists()):
+            return QuizQuestion.objects.none()
         return QuizQuestion.objects.filter(quiz_id=quiz_id)
 
     def perform_create(self, serializer):
         quiz_id = self.kwargs.get('quiz_pk')
         quiz = get_object_or_404(Quiz, id=quiz_id)
+        if self.request.user.role != 'teacher' or quiz.created_by != self.request.user:
+            raise PermissionDenied("Only the course teacher can edit quiz questions.")
         serializer.save(quiz=quiz)
 
 
@@ -722,14 +1191,24 @@ class QuizQuestionViewSet(viewsets.ModelViewSet):
 # --- QuizChoice Viewset for managing choices within a question ---
 class QuizChoiceViewSet(viewsets.ModelViewSet):
     serializer_class = QuizChoiceSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminTeacherOrReadOnlyForStudent]
 
     def get_queryset(self):
         question_id = self.kwargs.get('question_pk')
+        question = get_object_or_404(QuizQuestion, id=question_id)
+        quiz = question.quiz
+        user = self.request.user
+        if user.role == 'teacher' and quiz.created_by != user:
+            return QuizChoice.objects.none()
+        if user.role == 'student' and (not quiz.published or not Enrollment.objects.filter(student=user, subject=quiz.subject).exists()):
+            return QuizChoice.objects.none()
         return QuizChoice.objects.filter(question_id=question_id)
 
     def perform_create(self, serializer):
         question_id = self.kwargs.get('question_pk')
+        question = get_object_or_404(QuizQuestion, id=question_id)
+        if self.request.user.role != 'teacher' or question.quiz.created_by != self.request.user:
+            raise PermissionDenied("Only the course teacher can edit quiz choices.")
         serializer.save(question_id=question_id)
 
 # --- SubmitAssignmentView for students submitting assignments ---
@@ -740,7 +1219,9 @@ class SubmitAssignmentView(APIView):
         student = request.user
         assignment = get_object_or_404(Assignment, id=assignment_id, assigned_to=student)
 
-        # Optional: Add logic to save submission data here
+        assignment.submission_text = request.data.get('submission_text', '')
+        assignment.submitted_at = timezone.now()
+        assignment.save(update_fields=['submission_text', 'submitted_at'])
 
         Notification.objects.create(
             recipient=assignment.created_by,
@@ -749,7 +1230,7 @@ class SubmitAssignmentView(APIView):
             url=f"/teacher/assignments/{assignment.id}/grade",
             type="assignment_submitted"
         )
-        return Response({"detail": "Assignment submitted successfully."}, status=status.HTTP_200_OK)
+        return Response({"detail": "Assignment submitted successfully.", "submitted_at": assignment.submitted_at}, status=status.HTTP_200_OK)
 
 # --- SubmitQuizView for students submitting quiz answers and grading ---
 class SubmitQuizView(APIView):

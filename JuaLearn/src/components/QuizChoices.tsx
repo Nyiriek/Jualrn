@@ -157,6 +157,8 @@ const QuizChoices: React.FC<Props> = ({ quizId, questionId }) => {
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
           <TextField
+            id="legacy-quiz-choice-text"
+            name="legacyQuizChoiceText"
             label="Choice Text"
             fullWidth
             value={form.text}
@@ -168,6 +170,7 @@ const QuizChoices: React.FC<Props> = ({ quizId, questionId }) => {
           <FormControlLabel
             control={
               <Checkbox
+                inputProps={{ id: "legacy-quiz-choice-correct", name: "legacyQuizChoiceCorrect" }}
                 checked={form.is_correct}
                 onChange={(e) => setForm({ ...form, is_correct: e.target.checked })}
               />

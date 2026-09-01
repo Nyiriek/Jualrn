@@ -5,8 +5,14 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'https://jua-lern.onrender.com/api/',
 });
 
+const isAuthenticationRequest = (url = '') => /(?:^|\/)token\/?$|token\/refresh\/?$|auth\/admin-login\/?$/.test(String(url));
+
 api.interceptors.request.use(
   (config) => {
+    if (isAuthenticationRequest(config.url)) {
+      delete config.headers?.Authorization;
+      return config;
+    }
     const token = localStorage.getItem('accessToken');
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
@@ -18,8 +24,12 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    // A rejected login is an expected response, not an expired authenticated
+    // request. Let each login form show its own clear credentials error instead
+    // of trying to refresh an old token and redirecting away from the form.
+    const isLoginRequest = isAuthenticationRequest(originalRequest?.url);
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !isLoginRequest && !originalRequest._retry) {
       originalRequest._retry = true;
       const refreshToken = localStorage.getItem('refreshToken');
 

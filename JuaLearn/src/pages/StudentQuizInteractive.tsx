@@ -11,6 +11,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import axios from '../api/axios';
+import JuaCompanion from '../components/JuaCompanion';
 
 interface Choice {
   id: number;
@@ -78,13 +79,13 @@ const StudentQuizInteractive: React.FC = () => {
     }
   };
 
-  if (loading) return <CircularProgress />;
+  if (loading) return <><CircularProgress /><JuaCompanion /></>;
 
-  if (error) return <Alert severity="error">{error}</Alert>;
+  if (error) return <><Alert severity="error">{error}</Alert><JuaCompanion /></>;
 
   if (submitted)
     return (
-      <Box>
+      <><Box>
         <Typography variant="h5" gutterBottom>
           Quiz Completed
         </Typography>
@@ -92,11 +93,11 @@ const StudentQuizInteractive: React.FC = () => {
         <Button variant="contained" sx={{ mt: 2 }} onClick={() => navigate('/student/quizzes')}>
           Back to Quizzes
         </Button>
-      </Box>
+      </Box><JuaCompanion /></>
     );
 
   return (
-    <Box>
+    <><Box>
       <Typography variant="h4" gutterBottom>
         Quiz
       </Typography>
@@ -104,6 +105,7 @@ const StudentQuizInteractive: React.FC = () => {
         <Box key={q.id} sx={{ mb: 3 }}>
           <Typography sx={{ mb: 1 }}>{q.text}</Typography>
           <RadioGroup
+            name={`interactive_quiz_answer_${q.id}`}
             value={answers[q.id] || ''}
             onChange={(e) => handleAnswerChange(q.id, Number(e.target.value))}
           >
@@ -121,7 +123,7 @@ const StudentQuizInteractive: React.FC = () => {
       <Button variant="contained" onClick={handleSubmit}>
         Submit Quiz
       </Button>
-    </Box>
+    </Box><JuaCompanion /></>
   );
 };
 

@@ -167,6 +167,8 @@ const AdminLessons: React.FC = () => {
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
           <TextField
+            id="admin-lesson-title"
+            name="adminLessonTitle"
             label="Title"
             fullWidth
             value={form.title}
@@ -175,6 +177,8 @@ const AdminLessons: React.FC = () => {
           />
 
           <TextField
+            id="admin-lesson-subject"
+            name="adminLessonSubject"
             select
             label="Subject"
             fullWidth
@@ -192,6 +196,8 @@ const AdminLessons: React.FC = () => {
           </TextField>
 
           <TextField
+            id="admin-lesson-content"
+            name="adminLessonContent"
             label="Content (Markdown)"
             multiline
             minRows={10}

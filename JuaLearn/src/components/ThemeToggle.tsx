@@ -4,14 +4,16 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import { useThemeMode } from "../context/ThemeContext";
 
-const ThemeToggle: React.FC = () => {
+type ThemeToggleProps = { color?: string };
+
+const ThemeToggle: React.FC<ThemeToggleProps> = ({ color }) => {
   const { mode, toggleTheme } = useThemeMode();
   return (
-    <IconButton onClick={toggleTheme}>
+    <IconButton onClick={toggleTheme} aria-label="toggle colour theme">
       {mode === "dark" ? (
         <LightModeIcon sx={{ color: "#ffeb3b" }} />
       ) : (
-        <DarkModeIcon sx={{ color: "#23395d" }} />
+        <DarkModeIcon sx={{ color: color || "#23395d" }} />
       )}
     </IconButton>
   );

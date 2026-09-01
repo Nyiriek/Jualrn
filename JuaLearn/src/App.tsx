@@ -8,6 +8,10 @@ import TeacherLogin from './pages/TeacherLogin';
 import StudentRegister from './pages/StudentRegister';
 import TeacherRegister from './pages/TeacherRegister';
 import SubjectContent from './pages/SubjectContent';
+import PublicCourses from './pages/PublicCourses';
+import PublicCourseContent from './pages/PublicCourseContent';
+import StudentAccessPortal from './pages/StudentAccessPortal';
+import VerifyEmail from './pages/VerifyEmail';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
 import { useAuth } from './context/AuthContext';
@@ -37,16 +41,19 @@ import StudentQuizInteractive from './pages/StudentQuizInteractive';
 // Teacher pages:
 import TeacherDashboard from './pages/TeacherDashboard';
 import TeacherCourses from './pages/TeacherCourses';
+import TeacherResources from './pages/TeacherResources';
 import TeacherAssignments from './pages/TeacherAssignment';
 import TeacherQuizzes from './pages/TeacherQuizes';
 import TeacherGradebook from './pages/TeacherGradeBook';
+import TeacherSubmissions from './pages/TeacherSubmissions';
 import TeacherReports from './pages/TeacherReports';
 import TeacherForum from './pages/TeacherForum';
 import TeacherFeedback from './pages/TeacherFeedback';
 import TeacherStudentsTab from './components/TeacherStudentsTab';
+import TeacherTraining from './pages/TeacherTraining';
 
 const App = () => {
-  const { user } = useAuth();
+  const { user, accessToken, refreshToken, isAuthReady } = useAuth();
 
   return (
     <Router>
@@ -57,6 +64,10 @@ const App = () => {
         <Route path="/login/teacher" element={<TeacherLogin />} />
         <Route path="/register/student" element={<StudentRegister />} />
         <Route path="/register/teacher" element={<TeacherRegister />} />
+        <Route path="/courses" element={<PublicCourses />} />
+        <Route path="/courses/:id" element={<PublicCourseContent />} />
+        <Route path="/student-access" element={<StudentAccessPortal />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/student/subject/:id" element={<SubjectContent />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/student/quizzes/:id/interactive" element={<StudentQuizInteractive />} />
@@ -65,16 +76,18 @@ const App = () => {
       
 
         {/* Admin login */}
-        <Route path="/admin-login" element={<AdminLogin />} />
+        {/* Administration has its own entry point, separate from the learner and teacher sign-in portal. */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin-login" element={<Navigate to="/admin/login" replace />} />
 
         {/* Admin nested dashboard with role protection */}
         <Route
           path="/admin/*"
           element={
-            user?.role === "admin" ? (
+            !isAuthReady ? null : user?.role === "admin" && accessToken ? (
               <AdminDashboard />
             ) : (
-              <Navigate to="/admin-login" replace />
+              <Navigate to="/admin/login" replace />
             )
           }
         >
@@ -115,13 +128,16 @@ const App = () => {
         >
           <Route index element={<TeacherDashboard />} />
           <Route path="courses" element={<TeacherCourses />} />
+          <Route path="resources" element={<TeacherResources />} />
           <Route path="assignments" element={<TeacherAssignments />} /> 
           <Route path="quizzes" element={<TeacherQuizzes />} />       
           <Route path="gradebook" element={<TeacherGradebook />} />
+          <Route path="submissions" element={<TeacherSubmissions />} />
           <Route path="reports" element={<TeacherReports />} />
           <Route path="forum" element={<TeacherForum />} />
           <Route path="feedback" element={<TeacherFeedback />} />
           <Route path="students" element={<TeacherStudentsTab />} />
+          <Route path="training" element={<TeacherTraining />} />
           <Route path="notifications" element={<NotificationsPage />} />
         </Route>
       </Routes>

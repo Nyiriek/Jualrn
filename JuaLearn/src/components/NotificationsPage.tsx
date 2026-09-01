@@ -68,13 +68,14 @@ const NotificationsPage: React.FC = () => {
           >
             <ListItemText
               primary={n.title}
+              secondaryTypographyProps={{ component: "div" }}
               secondary={
-                <>
-                  <Typography variant="body2" color="textSecondary">
+                <Box>
+                  <Typography component="div" variant="body2" color="textSecondary">
                     {new Date(n.created_at).toLocaleString()}
                   </Typography>
-                  {n.message && <Typography>{n.message}</Typography>}
-                </>
+                  {n.message && <Typography component="div" variant="body2">{n.message}</Typography>}
+                </Box>
               }
             />
           </ListItem>
