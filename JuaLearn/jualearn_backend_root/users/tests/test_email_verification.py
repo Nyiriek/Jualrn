@@ -66,3 +66,35 @@ def test_registration_does_not_create_an_account_when_code_delivery_fails(monkey
     assert response.status_code == 503
     assert 'could not send' in response.data['detail'].lower()
     assert not get_user_model().objects.filter(email='unreachable@example.com').exists()
+
+
+@pytest.mark.django_db
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
+def test_teacher_registration_verification_and_login_flow():
+    client = APIClient()
+    registration = client.post('/api/register/teacher/', {
+        'username': 'teacher@example.com',
+        'email': 'teacher@example.com',
+        'first_name': 'Test',
+        'last_name': 'Teacher',
+        'institution': 'Jua Academy',
+        'years_of_experience': 2,
+        'phone_number': '0700000000',
+        'password': 'secure-pass-123',
+        'password2': 'secure-pass-123',
+        'role': 'teacher',
+    }, format='json')
+
+    assert registration.status_code == 201
+    user = get_user_model().objects.get(email='teacher@example.com')
+    record = EmailVerificationToken.objects.get(user=user)
+
+    blocked = client.post('/api/token/', {'username': user.username, 'password': 'secure-pass-123'}, format='json')
+    assert blocked.status_code == 401
+
+    verified = client.post('/api/auth/verify-email/', {'email': user.email, 'code': record.token}, format='json')
+    assert verified.status_code == 200
+
+    signed_in = client.post('/api/token/', {'username': user.username, 'password': 'secure-pass-123'}, format='json')
+    assert signed_in.status_code == 200
+    assert signed_in.data['role'] == 'teacher'
