@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 angie
+./jualearn_backend_root/.env
 
 # Editor directories and files
 .vscode/*

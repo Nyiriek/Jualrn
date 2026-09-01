@@ -8,6 +8,9 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      devOptions: {
+        enabled: false,
+      },
       includeAssets: [
         'favicon.svg',
         'robots.txt',
@@ -89,5 +92,9 @@ export default defineConfig({
     proxy: {
       '/api': 'http://localhost:8000',
     },
+  },
+  test: {
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.ts',
   },
 })

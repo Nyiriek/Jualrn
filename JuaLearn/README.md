@@ -25,6 +25,7 @@ JuaLearn is an AI-powered e-learning platform designed to provide high-quality e
 - **Profile & Notifications**: Update profile, view notifications.
 - **Theme Toggle**: Switch between light and dark mode.
 - **Mobile-First Design**: Fully responsive for all screen sizes.
+- **Jua Companion**: Role-aware AI support for studying, teaching preparation and platform administration. Conversations are private to each signed-in user.
 
 ---
 
@@ -92,7 +93,15 @@ Create a `.env` file in the backend directory with:
 DEBUG=True
 SECRET_KEY=your-secret-key
 DATABASE_URL=postgres://user:password@localhost:5432/jualearn
+OPENAI_API_KEY=your_openai_api_key
+OPENAI_MODEL=gpt-4o-mini
 ```
+
+### Jua Companion setup
+
+Copy `jualearn_backend_root/.env.example` to a backend `.env` file and set `OPENAI_API_KEY` there. The key is used only by Django; do not expose it in the React application or in a `VITE_` variable. Without a key, Jua Companion remains available with a clear configuration message and keeps conversation history private, but cannot generate live AI responses.
+
+The companion rate-limits chat requests, limits messages to 1,200 characters, uses only course material the signed-in user is allowed to access, and lets users delete their own conversation history.
 
 ---
 
@@ -194,4 +203,3 @@ class AssignmentListView(generics.ListCreateAPIView):
 
 
 # Thank you for exploring JuaLearn!
-
