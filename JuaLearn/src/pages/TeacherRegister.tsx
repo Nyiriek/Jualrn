@@ -83,7 +83,8 @@ const TeacherRegister = () => {
         return;
       }
 
-      navigate(`/verify-email?sent=1&role=teacher&email=${encodeURIComponent(form.email)}`);
+      // Standard registration: the account is immediately available to sign in.
+      navigate('/login/teacher');
     } catch {
       setError('Registration failed. Please try again.');
     }

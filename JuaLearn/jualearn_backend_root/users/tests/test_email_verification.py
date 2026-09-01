@@ -10,7 +10,7 @@ from users.models import EmailVerificationToken
 
 
 @pytest.mark.django_db
-@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend', EMAIL_VERIFICATION_REQUIRED=True)
 def test_email_verification_is_required_before_student_login():
     user = get_user_model().objects.create_user(
         username='new-learner', email='learner@example.com', password='secure-pass-123',
@@ -48,6 +48,7 @@ def test_expired_verification_code_is_rejected():
 
 
 @pytest.mark.django_db
+@override_settings(EMAIL_VERIFICATION_REQUIRED=True)
 def test_registration_does_not_create_an_account_when_code_delivery_fails(monkeypatch):
     monkeypatch.setattr(
         'users.views.create_and_send_verification',
@@ -69,7 +70,7 @@ def test_registration_does_not_create_an_account_when_code_delivery_fails(monkey
 
 
 @pytest.mark.django_db
-@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend', EMAIL_VERIFICATION_REQUIRED=True)
 def test_teacher_registration_verification_and_login_flow():
     client = APIClient()
     registration = client.post('/api/register/teacher/', {
@@ -98,3 +99,25 @@ def test_teacher_registration_verification_and_login_flow():
     signed_in = client.post('/api/token/', {'username': user.username, 'password': 'secure-pass-123'}, format='json')
     assert signed_in.status_code == 200
     assert signed_in.data['role'] == 'teacher'
+
+
+@pytest.mark.django_db
+def test_standard_student_registration_can_sign_in_without_email_verification():
+    client = APIClient()
+    registration = client.post('/api/register/student/', {
+        'username': 'standard-student@example.com',
+        'email': 'standard-student@example.com',
+        'password': 'secure-pass-123',
+        'first_name': 'Standard',
+        'last_name': 'Student',
+        'role': 'student',
+    }, format='json')
+
+    assert registration.status_code == 201
+    user = get_user_model().objects.get(email='standard-student@example.com')
+    assert user.email_verified is True
+    assert not EmailVerificationToken.objects.filter(user=user).exists()
+
+    signed_in = client.post('/api/token/', {'username': user.username, 'password': 'secure-pass-123'}, format='json')
+    assert signed_in.status_code == 200
+    assert signed_in.data['role'] == 'student'

@@ -53,7 +53,9 @@ class TeacherRegisterView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         user = serializer.save()
-        create_and_send_verification(user)
+        # Email verification is deliberately disabled for standard registration.
+        if settings.EMAIL_VERIFICATION_REQUIRED:
+            create_and_send_verification(user)
 
 # --------- STUDENT LIST VIEW ---------
 class StudentListViewSet(viewsets.ReadOnlyModelViewSet):
@@ -644,6 +646,7 @@ class AdminLoginView(APIView):
                 "role": "admin",
                 "firstName": user.first_name,
                 "lastName": user.last_name,
+                "profilePicture": user.profile_picture.url if user.profile_picture else None,
                 "access": str(refresh.access_token),
                 "refresh": str(refresh)
             })
@@ -670,7 +673,9 @@ class RegisterStudentView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         user = serializer.save(role='student')
-        create_and_send_verification(user)
+        # Email verification is deliberately disabled for standard registration.
+        if settings.EMAIL_VERIFICATION_REQUIRED:
+            create_and_send_verification(user)
 
 
 class VerifyEmailView(APIView):

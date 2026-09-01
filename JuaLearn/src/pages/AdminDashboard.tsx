@@ -49,7 +49,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, Outlet, useLocation } from 'react-router-dom';
 import JuaCompanion from '../components/JuaCompanion';
 import ProfileModal from '../components/ProfileModal';
-import { profilePictureUrl } from '../utils/profilePicture';
+import { profileInitials, profilePictureUrl } from '../utils/profilePicture';
 
 type User = { id: number; username: string; email: string; role: string };
 type Subject = { id: number; name: string; description: string };
@@ -312,7 +312,7 @@ const AdminDashboard: React.FC = () => {
           <ListItem disablePadding sx={{ display: 'block' }}>
             <ListItemButton onClick={() => setProfileOpen(true)} sx={{ minHeight: 56, justifyContent: open ? 'initial' : 'center', px: 2.5, color: 'inherit' }}>
               <ListItemIcon sx={{ minWidth: 0, mr: open ? 2 : 'auto', justifyContent: 'center', color: 'inherit' }}>
-                <Avatar src={profilePicture || profilePictureUrl(user?.profilePicture)} sx={{ width: 30, height: 30, bgcolor: 'rgba(255,255,255,.2)', fontSize: 13 }}>{(user?.firstName || user?.username || 'A').slice(0, 1).toUpperCase()}</Avatar>
+                <Avatar src={profilePicture || profilePictureUrl(user?.profilePicture)} sx={{ width: 30, height: 30, bgcolor: 'rgba(255,255,255,.2)', fontSize: 13 }}>{profileInitials(user?.firstName, user?.lastName, user?.username)}</Avatar>
               </ListItemIcon>
               {open && <ListItemText primary={user?.firstName || user?.username || 'Administrator'} secondary="View and edit profile" secondaryTypographyProps={{ color: 'rgba(255,255,255,.72)', variant: 'caption' }} />}
             </ListItemButton>

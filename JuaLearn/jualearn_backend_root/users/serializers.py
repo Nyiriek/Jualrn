@@ -3,13 +3,14 @@ from .models import User, Assignment, Subject, Notification, Quiz, Enrollment, Q
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.exceptions import AuthenticationFailed
 from django.contrib.auth.password_validation import validate_password
+from django.conf import settings
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
             'id', 'username', 'email', 'role', 'first_name', 'last_name',
-            'institution', 'years_of_experience', 'phone_number'
+            'institution', 'years_of_experience', 'phone_number', 'profile_picture'
         ]
 
 
@@ -98,7 +99,9 @@ class TeacherRegisterSerializer(serializers.ModelSerializer):
         user = User(**validated_data)
         user.set_password(password)
         user.role = 'teacher'
-        user.email_verified = False
+        # Verification is currently optional; retain the flag for when the
+        # code-based flow is re-enabled from the environment.
+        user.email_verified = not settings.EMAIL_VERIFICATION_REQUIRED
         user.save()
         return user
 
@@ -141,7 +144,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password')
         user = User(**validated_data)
         user.set_password(password)
-        user.email_verified = False
+        user.email_verified = not settings.EMAIL_VERIFICATION_REQUIRED
         user.save()
         return user
 
@@ -225,7 +228,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         data = super().validate(attrs)
-        if self.user.role in {'student', 'teacher'} and not self.user.email_verified:
+        if settings.EMAIL_VERIFICATION_REQUIRED and self.user.role in {'student', 'teacher'} and not self.user.email_verified:
             raise AuthenticationFailed('Please verify your email before signing in. Check your inbox or request a new verification code.')
         data['id'] = self.user.id
         data['username'] = self.user.username
@@ -233,6 +236,8 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data['role'] = self.user.role
         data['firstName'] = self.user.first_name
         data['lastName'] = self.user.last_name
+        # This keeps the avatar available after logout and the next login.
+        data['profilePicture'] = self.user.profile_picture.url if self.user.profile_picture else None
         return data
 
 class UserProfileSerializer(serializers.ModelSerializer):

@@ -7,3 +7,18 @@ export const profilePictureUrl = (value?: string) => {
   const serverOrigin = new URL(apiBase).origin;
   return `${serverOrigin}${value.startsWith('/') ? value : `/${value}`}`;
 };
+
+/** Create a stable two-letter avatar label when the user has no uploaded image. */
+export const profileInitials = (firstName?: string, lastName?: string, username?: string) => {
+  const nameParts = [firstName, lastName].filter(Boolean).map((part) => part!.trim()).filter(Boolean);
+  if (nameParts.length) return nameParts.map((part) => part[0]).join('').slice(0, 2).toUpperCase();
+
+  return (username || 'User')
+    .trim()
+    .split(/[\s._@-]+/)
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase() || 'U';
+};

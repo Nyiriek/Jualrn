@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button, Avatar, TextField, Box
 } from '@mui/material';
+import { profileInitials } from '../utils/profilePicture';
 
 type ProfileModalProps = {
   open: boolean;
@@ -77,9 +78,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
         <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
           <Avatar
             src={editUser.profilePicture}
+            alt={`${editUser.firstName} ${editUser.lastName}`.trim() || editUser.username}
             sx={{ width: 80, height: 80, mb: 2, cursor: 'pointer' }}
             onClick={() => fileInputRef.current?.click()}
-          />
+          >
+            {profileInitials(editUser.firstName, editUser.lastName, editUser.username)}
+          </Avatar>
           <Button size="small" onClick={() => fileInputRef.current?.click()}>Change profile picture</Button>
           <input
             id="profile-picture"

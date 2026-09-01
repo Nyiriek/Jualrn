@@ -34,6 +34,10 @@ def test_user_profile_picture_is_saved_and_returned_on_reload(student_user):
     assert reload_response.status_code == 200
     assert reload_response.data['profile_picture'] == response.data['profile_picture']
 
+    login_response = client.post('/api/token/', {'username': student_user.username, 'password': 'testpass123'}, format='json')
+    assert login_response.status_code == 200, login_response.data
+    assert response.data['profile_picture'].endswith(login_response.data['profilePicture'])
+
 @pytest.mark.django_db
 def test_assignment_creation_and_publish(teacher_client, subject):
     create_url = reverse('assignments-list')

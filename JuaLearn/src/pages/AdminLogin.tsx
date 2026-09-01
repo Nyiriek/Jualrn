@@ -37,6 +37,7 @@ const AdminLogin: React.FC = () => {
           role: data.role,
           firstName: data.firstName,
           lastName: data.lastName,
+          profilePicture: data.profilePicture,
           access: data.access,
           refresh: data.refresh,
         });

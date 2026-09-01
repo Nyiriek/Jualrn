@@ -63,8 +63,8 @@ const StudentRegister = () => {
         return;
       }
 
-      // Registration successful: the account activates after email ownership is confirmed.
-      navigate(`/verify-email?sent=1&role=student&email=${encodeURIComponent(email)}`);
+      // Standard registration: the account is immediately available to sign in.
+      navigate('/login/student');
     } catch (err) {
       setError('Registration failed. Please try again.');
     }

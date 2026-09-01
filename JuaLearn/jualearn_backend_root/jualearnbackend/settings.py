@@ -33,7 +33,7 @@ def load_local_env(path):
         key = key.strip()
         value = value.strip().strip('"').strip("'")
         if key in {
-            'OPENAI_API_KEY', 'OPENAI_MODEL', 'FRONTEND_URL', 'EMAIL_VERIFICATION_HOURS',
+            'OPENAI_API_KEY', 'OPENAI_MODEL', 'FRONTEND_URL', 'EMAIL_VERIFICATION_HOURS', 'EMAIL_VERIFICATION_REQUIRED',
             'DEFAULT_FROM_EMAIL', 'EMAIL_BACKEND', 'EMAIL_HOST', 'EMAIL_PORT',
             'EMAIL_HOST_USER', 'EMAIL_HOST_PASSWORD', 'EMAIL_USE_TLS',
         }:
@@ -137,9 +137,9 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Email verification. In local development emails are printed by Django's
-# console backend. Configure SMTP values in the server environment to deliver
-# real messages (see .env.example).
+# Email verification is currently disabled for the standard registration flow.
+# Set EMAIL_VERIFICATION_REQUIRED=True to turn the existing code flow back on.
+EMAIL_VERIFICATION_REQUIRED = os.getenv('EMAIL_VERIFICATION_REQUIRED', 'False').lower() == 'true'
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 EMAIL_VERIFICATION_HOURS = int(os.getenv('EMAIL_VERIFICATION_HOURS', '24'))
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'JuaLearn <no-reply@jualearn.local>')

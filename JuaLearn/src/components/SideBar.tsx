@@ -21,7 +21,7 @@ import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import { useThemeMode } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import ThemeToggle from './ThemeToggle';
-import { profilePictureUrl } from '../utils/profilePicture';
+import { profileInitials, profilePictureUrl } from '../utils/profilePicture';
 
 const drawerWidth = 240;
 
@@ -100,7 +100,7 @@ const SideBar: React.FC = () => {
           alt={user.username}
           sx={{ width: 38, height: 38, bgcolor: '#fff', color: sideBarBg, fontWeight: 700 }}
         >
-          {user.firstName?.[0]?.toUpperCase() || user.username?.[0]?.toUpperCase() || 'U'}
+          {profileInitials(user.firstName, user.lastName, user.username)}
         </Avatar>
         {!collapsed && (
           <Box sx={{ minWidth: 0 }}>
